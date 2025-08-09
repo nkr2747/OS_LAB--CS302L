@@ -61,12 +61,10 @@ struct image_t* S1_smoothen(struct image_t *input_image)
 					b += t_b;
 				}
 			}
-			cout<<r<<" ";
 			image->image_pixels[i][j][0] = (uint8_t)(r/(runningWindowSize*runningWindowSize));
 			image->image_pixels[i][j][1] = (uint8_t)(g/(runningWindowSize*runningWindowSize));
 			image->image_pixels[i][j][2] = (uint8_t)(b/(runningWindowSize*runningWindowSize));
 		}
-		cout<<endl;
 	}
 	return image;
 }
@@ -86,8 +84,6 @@ struct image_t* S2_find_details(struct image_t *input_image, struct image_t *smo
 				detailed_image->image_pixels[i][j] = new uint8_t[3];
 		}
 		
-		// maxval	
-		// get pixel values
 		for(int i = 0; i < detailed_image->height; i++)
 		{
 			for(int j = 0; j < detailed_image->width; j++)
@@ -122,53 +118,54 @@ struct image_t* S2_find_details(struct image_t *input_image, struct image_t *smo
 	return detailed_image;
 }
 
-struct image_t* S3_sharpen(struct image_t *input_image, struct image_t *smoothened_image)
+struct image_t* S3_sharpen(struct image_t *input_image, struct image_t *details_image)
 {
-	struct image_t* detailed_image = new struct image_t;
+	int alpha = 2;
+	struct image_t* sharpened_image = new struct image_t;
 	int height = input_image->height;
 	int width = input_image->width;
-	detailed_image->height = height;
-	detailed_image->width = width;
-	detailed_image->image_pixels = new uint8_t**[detailed_image->height];
-		for(int i = 0; i < detailed_image->height; i++)
+	sharpened_image->height = height;
+	sharpened_image->width = width;
+	sharpened_image->image_pixels = new uint8_t**[sharpened_image->height];
+		for(int i = 0; i < sharpened_image->height; i++)
 		{
-			detailed_image->image_pixels[i] = new uint8_t*[detailed_image->width];
-			for(int j = 0; j < detailed_image->width; j++)
-				detailed_image->image_pixels[i][j] = new uint8_t[3];
+			sharpened_image->image_pixels[i] = new uint8_t*[sharpened_image->width];
+			for(int j = 0; j < sharpened_image->width; j++)
+				sharpened_image->image_pixels[i][j] = new uint8_t[3];
 		}
 		
 		// maxval	
 		// get pixel values
-		for(int i = 0; i < detailed_image->height; i++)
+		for(int i = 0; i < sharpened_image->height; i++)
 		{
-			for(int j = 0; j < detailed_image->width; j++)
+			for(int j = 0; j < sharpened_image->width; j++)
 			{
 				for(int k = 0; k < 3; k++)
 				{
-					int r_s = smoothened_image->image_pixels[i][j][0];
-					int g_s = smoothened_image->image_pixels[i][j][1];
-					int b_s = smoothened_image->image_pixels[i][j][2];
+					int r_s = details_image->image_pixels[i][j][0];
+					int g_s = details_image->image_pixels[i][j][1];
+					int b_s = details_image->image_pixels[i][j][2];
 
 					int r_i = input_image->image_pixels[i][j][0];
 					int g_i = input_image->image_pixels[i][j][1];
 					int b_i = input_image->image_pixels[i][j][2];
 
-					int r_d = r_i + r_s;
-					int g_d = g_i + g_s;
-					int b_d = b_i + b_s;
+					int r_d = r_i + (alpha)*r_s;
+					int g_d = g_i + (alpha)*g_s;
+					int b_d = b_i + (alpha)*b_s;
 
 					if(r_d>255) r_d = 255;
 					if(g_d>255) g_d = 255;
 					if(b_d>255) b_d = 255;
 
 
-					detailed_image->image_pixels[i][j][0] = (uint8_t)r_d;
-					detailed_image->image_pixels[i][j][1] =(uint8_t)g_d;
-					detailed_image->image_pixels[i][j][2] = (uint8_t)b_d;
+					sharpened_image->image_pixels[i][j][0] = (uint8_t)r_d;
+					sharpened_image->image_pixels[i][j][1] =(uint8_t)g_d;
+					sharpened_image->image_pixels[i][j][2] = (uint8_t)b_d;
 				}
 			}
 		}
-	return detailed_image;
+	return sharpened_image;
 }
 
 int main(int argc, char **argv)
@@ -180,14 +177,16 @@ int main(int argc, char **argv)
 	}
 	
 	struct image_t *input_image = read_ppm_file(argv[1]);
-	
+	cout<<"Smoothening image..."<<endl;
 	struct image_t *smoothened_image = S1_smoothen(input_image);
-	
-	 struct image_t *details_image = S2_find_details(input_image, smoothened_image);
-	
-	 struct image_t *sharpened_image = S3_sharpen(input_image, details_image);
-	
-	 write_ppm_file(argv[2], sharpened_image);
+	cout<<"Smooth image created..."<<endl;
+	cout<<"Finding details..."<<endl;
+	struct image_t *details_image = S2_find_details(input_image, smoothened_image);
+	cout<<"Details found..."<<endl;
+	cout<<"Adding details..."<<endl;
+	struct image_t *sharpened_image = S3_sharpen(input_image, details_image);
+	cout<<"Completed!"<<endl;
+	write_ppm_file(argv[2], sharpened_image);
 	
 	return 0;
 }

@@ -1,10 +1,21 @@
-build-sharpen: ./a.out
+# Makefile for Windows (MinGW / g++)
+# Usage:
+#   make build-sharpen
+#   make run-sharpen INPUT=input_file OUTPUT=output_file
+#   make clean
 
-./a.out: image_sharpener.cpp libppm.cpp
-	g++ -g image_sharpener.cpp libppm.cpp
+TARGET = a.exe
+CXX = g++
+CXXFLAGS = -g
+SRC = image_sharpener.cpp libppm.cpp
 
-run-sharpen: ./a.out
-	./a.out ../images/$(INPUT).ppm ../images/$(OUTPUT).ppm
+build-sharpen: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET)
+
+run-sharpen: $(TARGET)
+	$(TARGET) ..\images\$(INPUT).ppm ..\images\$(OUTPUT).ppm
 
 clean:
-	rm a.out
+	del /Q $(TARGET)
