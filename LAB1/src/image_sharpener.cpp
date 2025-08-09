@@ -185,8 +185,7 @@ int main(int argc, char **argv)
 	cout<<"Details found..."<<endl;
 	cout<<"Adding details..."<<endl;
 	struct image_t *sharpened_image = S3_sharpen(input_image, details_image);
-	cout<<"Completed!"<<endl;
+	//cout<<"Completed!"<<endl;
 	write_ppm_file(argv[2], sharpened_image);
-	
 	return 0;
 }
