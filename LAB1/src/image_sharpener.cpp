@@ -71,8 +71,8 @@ struct image_t* S1_smoothen(struct image_t *input_image)
 
     // Calculate duration in milliseconds
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-	cout<<"dimension of the image is: "<<"height"<<" "<< input_image->height <<" "<< "width"<<" "<< input_image->width <<endl;
-	cout<<"execution time for smoothening: "<< duration.count() << endl;
+	cout<<"dimension of the image is: \n"<<"height: "<< input_image->height <<" pixels\t"<< "width: "<< input_image->width <<" pixels"<<endl;
+	cout<<"execution time for smoothening: "<< duration.count() <<" ms"<< endl;
 	return image;
 }
 
@@ -127,7 +127,7 @@ struct image_t* S2_find_details(struct image_t *input_image, struct image_t *smo
 
     // Calculate duration in milliseconds
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-	cout<<"execution time for finding details: "<< duration.count() << endl;
+	cout<<"execution time for finding details: "<< duration.count() <<" ms"<< endl;
 	return detailed_image;
 }
 
@@ -183,7 +183,7 @@ struct image_t* S3_sharpen(struct image_t *input_image, struct image_t *details_
 
     // Calculate duration in milliseconds
     auto duration =chrono::duration_cast<chrono::milliseconds>(end - start);
-	cout<<"execution time for sharpening: "<< duration.count() << endl;
+	cout<<"execution time for sharpening: "<< duration.count() <<" ms"<< endl;
 	return sharpened_image;
 }
 
@@ -194,17 +194,20 @@ int main(int argc, char **argv)
 		cout << "usage: ./a.out <path-to-original-image> <path-to-transformed-image>\n\n";
 		//exit(0);
 	}
-	
+
+	auto start =chrono::high_resolution_clock::now();
 	struct image_t *input_image = read_ppm_file(argv[1]);
-	cout<<"Smoothening image..."<<endl;
+	auto end =chrono::high_resolution_clock::now();
+	auto duration =chrono::duration_cast<chrono::milliseconds>(end - start);
+	cout<<"execution time for reading ppm file: "<< duration.count() <<" ms"<< endl;
+
 	struct image_t *smoothened_image = S1_smoothen(input_image);
-	cout<<"Smooth image created..."<<endl;
-	cout<<"Finding details..."<<endl;
 	struct image_t *details_image = S2_find_details(input_image, smoothened_image);
-	cout<<"Details found..."<<endl;
-	cout<<"Adding details..."<<endl;
 	struct image_t *sharpened_image = S3_sharpen(input_image, details_image);
-	cout<<"Completed!"<<endl;
+	start =chrono::high_resolution_clock::now();
 	write_ppm_file(argv[2], sharpened_image);
+	end =chrono::high_resolution_clock::now();
+	duration =chrono::duration_cast<chrono::milliseconds>(end - start);
+	cout<<"execution time for writing ppm file: "<< duration.count() <<" ms"<< endl;
 	return 0;
 }

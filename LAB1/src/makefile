@@ -6,7 +6,7 @@
 
 TARGET = a.exe
 CXX = g++
-CXXFLAGS = -g
+CXXFLAGS = -g -std=c++11
 SRC = image_sharpener.cpp libppm.cpp
 
 build-sharpen: $(TARGET)
