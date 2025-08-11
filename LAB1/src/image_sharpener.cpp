@@ -7,7 +7,7 @@
 #include<chrono>
 using namespace std;
 
-int runningWindowSize = 5;
+int runningWindowSize = 3;
 int t = (runningWindowSize-1)/2;
 /// 
 struct image_t* S1_smoothen(struct image_t *input_image)
@@ -55,8 +55,8 @@ struct image_t* S1_smoothen(struct image_t *input_image)
 				for(int jj = j-t; jj<=j+t; jj++){
 					if(ii<0 || ii>= input_image->height|| jj<0 || jj>=input_image->width) continue;
 					int t_r = input_image->image_pixels[ii][jj][0];
-					int t_b = input_image->image_pixels[ii][jj][1];
-					int t_g = input_image->image_pixels[ii][jj][2];
+					int t_g = input_image->image_pixels[ii][jj][1];
+					int t_b = input_image->image_pixels[ii][jj][2];
 					r += t_r;
 					g += t_g;
 					b += t_b;
