@@ -71,7 +71,6 @@ struct image_t* S1_smoothen(struct image_t *input_image)
 
     // Calculate duration in milliseconds
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-	cout<<"dimension of the image is: \n"<<"height: "<< input_image->height <<" pixels\t"<< "width: "<< input_image->width <<" pixels"<<endl;
 	cout<<"execution time for smoothening: "<< duration.count() <<" ms"<< endl;
 	return image;
 }
@@ -199,8 +198,8 @@ int main(int argc, char **argv)
 	struct image_t *input_image = read_ppm_file(argv[1]);
 	auto end =chrono::high_resolution_clock::now();
 	auto duration =chrono::duration_cast<chrono::milliseconds>(end - start);
+	cout<<"dimension of the image is: \n"<<"height: "<< input_image->height <<" pixels\t"<< "width: "<< input_image->width <<" pixels"<<endl;
 	cout<<"execution time for reading ppm file: "<< duration.count() <<" ms"<< endl;
-
 	struct image_t *smoothened_image = S1_smoothen(input_image);
 	struct image_t *details_image = S2_find_details(input_image, smoothened_image);
 	struct image_t *sharpened_image = S3_sharpen(input_image, details_image);
