@@ -11,14 +11,10 @@ vector<pid_t> children;
 
 void handler(int sign)
 {
-	cout<<"hi";
 	if (sign == SIGUSR1)
 	{
-		cout<<"hi";
-		for(auto it: children){
-			cout<<"hi";
-			kill(it, SIGINT);
-		}
+		cout<<children.size()<<" ";
+		cout<<"ye?"<<endl;
 	}
 }
 
@@ -42,15 +38,19 @@ int main(int argc, char **argv)
 	int max_chunk_size = atoi(argv[5]);
 	pid_t pid1, pid2;
 	int cur_chunk_size = search_end_position - search_start_position + 1;
+	pid_t leader_pid = getpid();
 	while (cur_chunk_size > max_chunk_size)
 	{
 		pid1 = fork();
 		if (pid1 != 0)
 		{
-			// and this block is for right child
+			// thhis is still parent--, till now the variables will be in right child
+
 			pid2 = fork();
 			if (pid2 == 0)
 			{
+				// and this block is for right child
+				setpgid(pid2,leader_pid);
 				cur_chunk_size = cur_chunk_size / 2;
 				search_start_position = search_start_position + cur_chunk_size;
 			}
@@ -58,6 +58,7 @@ int main(int argc, char **argv)
 		else
 		{
 			// i think this one block is for left child
+			setpgid(pid1,leader_pid);
 			cur_chunk_size = cur_chunk_size / 2;
 			search_end_position = search_start_position + cur_chunk_size - 1;
 		}
@@ -69,14 +70,16 @@ int main(int argc, char **argv)
 			return 0;
 		}
 	}
-	children.push_back(getpid());
+	
+	//cout<<"-"<<children.size()<<"-"<<endl;
 	const char *program_path = "./part3_searcher";
 
 	// Arguments to pass to the program (first argument is the program name itself)
 	// The list must be terminated by a NULL pointer.
 	string start_str = to_string(search_start_position);
 	string end_str = to_string(search_end_position);
-	execl(program_path, program_path, file_to_search_in, pattern_to_search_for, start_str.c_str(), end_str.c_str(), NULL);
+	string GID = to_string(leader_pid);
+	execl(program_path, program_path, file_to_search_in, pattern_to_search_for, start_str.c_str(), end_str.c_str(), GID.c_str(), NULL);
 
 	// TODO
 	// cout << "[" << my_pid << "] start position = " << search_start_position << " ; end position = " << search_end_position << "\n";

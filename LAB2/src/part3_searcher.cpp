@@ -9,10 +9,9 @@ using namespace std;
 int main(int argc, char **argv)
 {
 
-    if (argc != 5)
+    if (argc != 6)
     {
-        cout<<argc<<"--";
-        cout << "usage: ./partitioner.out <path-to-file> <pattern> <search-start-position> <search-end-position>\nprovided arguments:\n";
+        cout << "usage: ./partitioner.out <path-to-file> <pattern> <search-start-position> <search-end-position> <group ID> \nprovided arguments:\n";
         for (int i = 0; i < argc; i++)
             cout << argv[i] << "\n";
         return -1;
@@ -22,7 +21,7 @@ int main(int argc, char **argv)
     char *pattern_to_search_for = argv[2];
     int search_start_position = atoi(argv[3]);
     int search_end_position = atoi(argv[4]);
-
+    pid_t GID = static_cast<pid_t>(atoi(argv[5]));
     // TODO
     int len = 0;
     for(int i = 0; pattern_to_search_for[i] != '\0'; i++){
@@ -55,7 +54,8 @@ int main(int argc, char **argv)
             if(flag){
                 auto pid = getpid();
                 cout<<"PID: "<<pid<<" Pattern found at position: "<<i+search_start_position<<" start: "<<search_start_position<<" end: "<<search_end_position<<endl;
-                kill(getppid(),SIGUSR1);
+                killpg(GID,SIGINT);
+                cout<<"kill chala kya?"<<endl;
                 return 1;
             }
         }
