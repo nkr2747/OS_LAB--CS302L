@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
-#include <sys/wait.h>
+//#include <sys/wait.h>
 #include <signal.h>
 
 using namespace std;
@@ -22,6 +22,13 @@ int main(int argc, char **argv)
 	int search_end_position = atoi(argv[4]);
 	int max_chunk_size = atoi(argv[5]);
 	
+	int cur_chunk_size = search_end_position - search_start_position + 1;
+	if(cur_chunk_size > max_chunk_size){
+		pid_t my_children[2];
+		pid_t my_children[0] = fork();
+		pid_t my_children[1] = fork();
+		if()
+	}
 	//TODO
 	//cout << "[" << my_pid << "] start position = " << search_start_position << " ; end position = " << search_end_position << "\n";
 	//cout << "[" << my_pid << "] forked left child " << my_children[0] << "\n";
