@@ -23,9 +23,9 @@ int main(int argc, char **argv)
 	int max_chunk_size = atoi(argv[5]);
 	pid_t pid1, pid2;
 	int cur_chunk_size = search_end_position - search_start_position + 1;
+	cout<<"["<<getpid()<<"] start position = "<<search_start_position<<" ; end position = "<<search_end_position<<endl;
 	while (cur_chunk_size > max_chunk_size)
 	{
-		cout<<"["<<getpid()<<"] start position = "<<search_start_position<<" ; end position = "<<search_end_position<<endl;
 		pid1 = fork();
 		if (pid1 != 0)
 		{
@@ -36,6 +36,7 @@ int main(int argc, char **argv)
 			{
 				cur_chunk_size = cur_chunk_size / 2;
 				search_start_position = search_start_position+ cur_chunk_size ;
+				cout<<"["<<getpid()<<"] start position = "<<search_start_position<<" ; end position = "<<search_end_position<<endl;
 			}
 			else{
 				cout<<"["<<getpid()<<"] forked right child "<<pid2<<endl;
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
 			// i think this one block is for left child
 			cur_chunk_size = cur_chunk_size / 2;
 			search_end_position = search_start_position + cur_chunk_size -1;
-		}
+		}	cout<<"["<<getpid()<<"] start position = "<<search_start_position<<" ; end position = "<<search_end_position<<endl;
 		if (pid1 != 0 && pid2 != 0)
 		{
 			waitpid(pid1, NULL, 0);

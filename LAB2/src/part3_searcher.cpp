@@ -56,7 +56,7 @@ int main(int argc, char **argv)
                 cout<<"["<<getpid()<<"] found at "<<i+search_start_position<<endl;
                 killpg(GID,SIGUSR1);
                 cout<<"kill chala kya?"<<endl;
-                return 1;
+                return 0;
             }
         }
     }

@@ -53,7 +53,7 @@ int main(int argc, char **argv)
             if(flag){
                 auto pid = getpid();
                 cout<<"["<<getpid()<<"] found at "<<i+search_start_position<<endl;
-                return 1;
+                return 0;
             }
         }
     }
