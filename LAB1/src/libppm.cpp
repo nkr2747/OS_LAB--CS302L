@@ -39,7 +39,11 @@ struct image_t *read_ppm_file(char *path_to_input_file)
 		struct image_t *image = new struct image_t;
 
 		uint8_t val = skip_blanks_comments_while_reading(&read_stream); // 'P'
+<<<<<<< HEAD
 		val = read_stream.get();										//'6'
+=======
+		val = read_stream.get(); //'6'
+>>>>>>> 1cdabe728748b009054c89060558fe3d4e40c58d
 		image->height = 0;
 		image->width = 0;
 		// width
