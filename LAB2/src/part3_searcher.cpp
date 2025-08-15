@@ -53,14 +53,14 @@ int main(int argc, char **argv)
             }
             if(flag){
                 auto pid = getpid();
-                cout<<"PID: "<<pid<<" Pattern found at position: "<<i+search_start_position<<" start: "<<search_start_position<<" end: "<<search_end_position<<endl;
-                killpg(GID,SIGINT);
+                cout<<"["<<getpid()<<"] found at "<<i+search_start_position<<endl;
+                killpg(GID,SIGUSR1);
                 cout<<"kill chala kya?"<<endl;
                 return 1;
             }
         }
     }
     auto pid = getpid();
-    cout <<"PID: "<<pid<<" didn't find. start: "<<search_start_position<<" end: "<<search_end_position<<endl;
+    cout<<"["<<getpid()<<"] didn't find"<<endl;
     return 0;
 }

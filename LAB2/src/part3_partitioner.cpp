@@ -7,14 +7,12 @@
 
 using namespace std;
 
-vector<pid_t> children;
-
 void handler(int sign)
 {
 	if (sign == SIGUSR1)
 	{
-		cout<<children.size()<<" ";
-		cout<<"ye?"<<endl;
+		cout<<"["<<getpid()<<"] received SIGTERM"<<endl;
+		kill(getpid(),SIGTERM);
 	}
 }
 
@@ -41,11 +39,12 @@ int main(int argc, char **argv)
 	pid_t leader_pid = getpid();
 	while (cur_chunk_size > max_chunk_size)
 	{
+		cout<<"["<<getpid()<<"] start position = "<<search_start_position<<" ; end position = "<<search_end_position<<endl;
 		pid1 = fork();
 		if (pid1 != 0)
 		{
 			// thhis is still parent--, till now the variables will be in right child
-
+			cout<<"["<<getpid()<<"] forked left child "<<pid1<<endl;
 			pid2 = fork();
 			if (pid2 == 0)
 			{
@@ -53,6 +52,9 @@ int main(int argc, char **argv)
 				setpgid(pid2,leader_pid);
 				cur_chunk_size = cur_chunk_size / 2;
 				search_start_position = search_start_position + cur_chunk_size;
+			}
+			else{
+				cout<<"["<<getpid()<<"] forked right child "<<pid2<<endl;
 			}
 		}
 		else
@@ -64,9 +66,11 @@ int main(int argc, char **argv)
 		}
 		if (pid1 != 0 && pid2 != 0)
 		{
-			//    waitpid(pid1, NULL, 0);
-			//    waitpid(pid2, NULL, 0);
-			wait(NULL);
+			    waitpid(pid1, NULL, 0);
+				cout<<"["<<getpid()<<"] left child returned"<<endl;
+			    waitpid(pid2, NULL, 0);
+				cout<<"["<<getpid()<<"] right child returned"<<endl;
+			//wait(NULL);
 			return 0;
 		}
 	}
@@ -79,8 +83,15 @@ int main(int argc, char **argv)
 	string start_str = to_string(search_start_position);
 	string end_str = to_string(search_end_position);
 	string GID = to_string(leader_pid);
-	execl(program_path, program_path, file_to_search_in, pattern_to_search_for, start_str.c_str(), end_str.c_str(), GID.c_str(), NULL);
-
+	pid_t searcher_child = fork();
+	if(searcher_child == 0){
+		execl(program_path, program_path, file_to_search_in, pattern_to_search_for, start_str.c_str(), end_str.c_str(), GID.c_str(), NULL);
+	}
+	else{
+		cout<<"["<<getpid()<<"] forked searcher child "<<searcher_child<<endl;
+		wait(NULL);
+		cout<<"["<<getpid()<<"] searcher child returned"<<endl;
+	}
 	// TODO
 	// cout << "[" << my_pid << "] start position = " << search_start_position << " ; end position = " << search_end_position << "\n";
 	// cout << "[" << my_pid << "] forked left child " << my_children[0] << "\n";
