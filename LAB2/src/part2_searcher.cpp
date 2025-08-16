@@ -10,8 +10,7 @@ int main(int argc, char **argv)
 {
     if (argc != 5)
     {
-        cout<<argc<<"--";
-        cout << "usage: ./partitioner.out <path-to-file> <pattern> <search-start-position> <search-end-position>\nprovided arguments:\n";
+        cout << "usage: ./part2_searcher.out <path-to-file> <pattern> <search-start-position> <search-end-position>\nprovided arguments:\n";
         for (int i = 0; i < argc; i++)
             cout << argv[i] << "\n";
         return -1;
@@ -53,12 +52,12 @@ int main(int argc, char **argv)
             }
             if(flag){
                 auto pid = getpid();
-                cout<<"PID: "<<pid<<" Pattern found at position: "<<i+search_start_position<<" start: "<<search_start_position<<" end: "<<search_end_position<<endl;
+                cout<<"["<<getpid()<<"] found at "<<i+search_start_position<<endl;
                 return 1;
             }
         }
     }
     auto pid = getpid();
-    cout <<"PID: "<<pid<<" didn't find. start: "<<search_start_position<<" end: "<<search_end_position<<endl;
+    cout<<"["<<getpid()<<"] didn't find"<<endl;
     return 0;
 }
