@@ -52,12 +52,12 @@ int main(int argc, char **argv)
             }
             if(flag){
                 auto pid = getpid();
-                cout<<"PID: "<<pid<<" Pattern found at position: "<<i+search_start_position<<endl;
-                return 1;
+                cout<<"["<<getpid()<<"] found at "<<i+search_start_position<<endl;
+                return 0;
             }
         }
     }
     auto pid = getpid();
-    cout <<"PID: "<<pid<< " didn't find\n";
+    cout<<"["<<getpid()<<"] didn't find"<<endl;
     return 0;
 }
