@@ -13,22 +13,21 @@ build-part2: part2_searcher part2_partitioner
 
 part2_searcher: part2_searcher.cpp
 	g++ part2_searcher.cpp -o part2_searcher
-part2_partitioner: part2_partitioner
+part2_partitioner: part2_partitioner.cpp
 	g++ part2_partitioner.cpp -o part2_partitioner
 run-part2:
 	./part2_partitioner file.txt MYOA 0 127 32
 clean-part2:
 	rm part2_searcher part2_partitioner
-
-
 build-part3: part3_searcher part3_partitioner
 
 part3_searcher: part3_searcher.cpp
 	g++ part3_searcher.cpp -o part3_searcher
-part3_partitioner: part3_partitioner
+part3_partitioner: part3_partitioner.cpp
 	g++ part3_partitioner.cpp -o part3_partitioner
 run-part3:
-	./part3_partitioner file.txt MYOA 0 127 32
+	./part3_partitioner file.txt MYOA 0 127 16
 clean-part3:
 	rm part3_searcher part3_partitioner
-clean: clean-part1 clean-part2 clean-part3
+clean:
+	rm part1.out part2_searcher part2_partitioner part3_searcher part3_partitioner

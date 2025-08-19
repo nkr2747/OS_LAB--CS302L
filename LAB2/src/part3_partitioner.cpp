@@ -9,6 +9,7 @@ using namespace std;
 
 void handler(int sign)
 {
+	//cout<<"HI";
 	if (sign == SIGUSR1)
 	{
 		cout<<"["<<getpid()<<"] received SIGTERM"<<endl;
@@ -37,6 +38,7 @@ int main(int argc, char **argv)
 	pid_t pid1, pid2;
 	int cur_chunk_size = search_end_position - search_start_position + 1;
 	pid_t leader_pid = getpid();
+	setpgid(leader_pid,leader_pid);
 	cout<<"["<<getpid()<<"] start position = "<<search_start_position<<" ; end position = "<<search_end_position<<endl;
 	while (cur_chunk_size > max_chunk_size)
 	{
@@ -50,7 +52,7 @@ int main(int argc, char **argv)
 			{
 				
 				// and this block is for right child
-				setpgid(pid2,leader_pid);
+				setpgid(getpid(),leader_pid);
 				cur_chunk_size = cur_chunk_size / 2;
 				search_start_position = search_start_position + cur_chunk_size;
 				cout<<"["<<getpid()<<"] start position = "<<search_start_position<<" ; end position = "<<search_end_position<<endl;
@@ -63,7 +65,7 @@ int main(int argc, char **argv)
 		{
 			
 			// i think this one block is for left child
-			setpgid(pid1,leader_pid);
+			setpgid(getpid(),leader_pid);
 			cur_chunk_size = cur_chunk_size / 2;
 			search_end_position = search_start_position + cur_chunk_size - 1;
 			cout<<"["<<getpid()<<"] start position = "<<search_start_position<<" ; end position = "<<search_end_position<<endl;
@@ -89,6 +91,7 @@ int main(int argc, char **argv)
 	string GID = to_string(leader_pid);
 	pid_t searcher_child = fork();
 	if(searcher_child == 0){
+		setpgid(getpid(),leader_pid);
 		execl(program_path, program_path, file_to_search_in, pattern_to_search_for, start_str.c_str(), end_str.c_str(), GID.c_str(), NULL);
 	}
 	else{

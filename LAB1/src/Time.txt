@@ -1,0 +1,49 @@
+For image 1.ppm
+execution time for reading ppm file: 22.8 ms
+execution time for smoothening: 20.8 ms
+execution time for finding details: 10.0 ms
+execution time for sharpening: 7.4 ms
+execution time for writing ppm file: 12.4 ms
+
+For image 2.ppm
+execution time for reading ppm file: 62.4 ms
+execution time for smoothening: 73.6 ms
+execution time for finding details: 31.8 ms
+execution time for sharpening: 27.6 ms
+execution time for writing ppm file: 44.8 ms
+
+For image 3.ppm
+execution time for reading ppm file: 112.4 ms
+execution time for smoothening: 137.6 ms
+execution time for finding details: 58.8 ms
+execution time for sharpening: 52.8 ms
+execution time for writing ppm file: 83.2 ms
+
+For image 4.ppm
+execution time for reading ppm file: 223.8 ms
+execution time for smoothening: 270.0 ms
+execution time for finding details: 117.4 ms
+execution time for sharpening: 105.6 ms
+execution time for writing ppm file: 169.6 ms
+
+For image 5.ppm
+execution time for reading ppm file: 274.8 ms
+execution time for smoothening: 344.8 ms
+execution time for finding details: 155.4 ms
+execution time for sharpening: 145.6 ms
+execution time for writing ppm file: 212.2 ms
+
+For image 6.ppm
+execution time for reading ppm file: 630.2 ms
+execution time for smoothening: 777.6 ms
+execution time for finding details: 343.6 ms
+execution time for sharpening: 317.4 ms
+execution time for writing ppm file: 480.2 ms
+
+For image 7.ppm
+execution time for reading ppm file: 1790.4 ms
+execution time for smoothening: 2147.6 ms
+execution time for finding details: 950.2 ms
+execution time for sharpening: 857.2 ms
+execution time for writing ppm file: 1321.2 ms
+
