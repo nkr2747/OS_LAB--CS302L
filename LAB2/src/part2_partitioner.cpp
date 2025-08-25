@@ -60,8 +60,9 @@ int main(int argc, char **argv)
 	}
 	const char *program_path = "./part2_searcher";
 
-	// Arguments to pass to the program (first argument is the program name itself)
-	// The list must be terminated by a NULL pointer.
+	// first me name hota hai
+	// last me null hota hai
+	// bich me sare arguements
 	string start_str = to_string(search_start_position);
 	string end_str = to_string(search_end_position);
 	pid_t searcher_child = fork();
