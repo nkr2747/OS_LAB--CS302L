@@ -4,7 +4,7 @@ part1.out: part1_searcher.cpp
 	g++ -g part1_searcher.cpp -o part1.out
 
 run-part1: part1.out
-	./part1.out file.txt NGTNIJGK 0 67108863
+	./part1.out file.txt CUMKCY 0 17
 
 clean-part1:
 	rm part1.out
@@ -16,7 +16,7 @@ part2_searcher: part2_searcher.cpp
 part2_partitioner: part2_partitioner.cpp
 	g++ part2_partitioner.cpp -o part2_partitioner
 run-part2:
-	./part2_partitioner file.txt MYOA 0 127 32
+	./part2_partitioner file.txt NGTNIJGK 0 67108863 8388608
 clean-part2:
 	rm part2_searcher part2_partitioner
 build-part3: part3_searcher part3_partitioner
@@ -26,7 +26,7 @@ part3_searcher: part3_searcher.cpp
 part3_partitioner: part3_partitioner.cpp
 	g++ part3_partitioner.cpp -o part3_partitioner
 run-part3:
-	./part3_partitioner file.txt MYOA 0 127 16
+	./part3_partitioner file.txt NGTNIJGK 0 67108863 8388608
 clean-part3:
 	rm part3_searcher part3_partitioner
 clean:

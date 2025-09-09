@@ -1,146 +1,87 @@
 #include <iostream>
-#include <algorithm>
-#include <vector>
+#include <bits/stdc++.h>
 #include <fstream>
-#include <string>
-#include <queue>
+#include "Processor.h"
 using namespace std;
 
-struct pcb_t
+vector<Process *> parser(string location)
 {
-    int arrival_time;
-    int scheduled_time;
-    int completion_time;
-    int wait_time;
-    int cur_pos;
-    vector<int> bursts;
-};
+    ifstream file;
+    file.open(location);
+    string line = "";
+    int count = 0;
+    // char first ;
+    vector<Process *> parsed_data;
+    while (line != "<pre>")
+    {
+        getline(file, line);
+        // cout<<line<<" ";
+        count++;
+        if (count > 3)
+            return parsed_data;
+    }
+    int p_count = 1;
+    while (!file.eof())
+    {
+        Process *temp = new Process();
+        string first;
+        file >> first;
+        if (first == "</pre></body></html>")
+        {
+            break;
+        }
+        temp->arrival = stoi(first);
+        // cout<<temp->arrival<<" ";
+        int burst;
+        file >> burst;
+
+        while (burst != -1)
+        {
+            // cout<<burst<<" ";
+            temp->bursts.push_back(burst);
+            file >> burst;
+        }
+        // file>>burst;
+        temp->p_no = p_count;
+        p_count++;
+        parsed_data.push_back(temp);
+    }
+    return parsed_data;
+}
 
 int main(int argc, char *argv[])
 {
     if (argc != 3)
     {
+        // cout<<argc;
         cout << "Invalid format!\nIt should be in:-\n";
-        cout << "./main <scheduler-type> <test-file>";
+        cout << "./main <scheduler-type>(FIFO/NPSJF/PSJF/RR) <test-file>";
         return 0;
     }
     char *process_file = argv[2];
     char *scheduling_algorithm = argv[1];
-    ifstream file;
-    file.open(process_file);
-    int num;
-    vector<struct pcb_t *> processes;
-    while (!file.eof())
+    vector<Process *> parsed_data = parser(process_file);
+    Processor cpu0;
+    string algo = scheduling_algorithm;
+    //display(parsed_data);
+    switch (algo)
     {
-        num = -2;
-        struct pcb_t *temp = new pcb_t;
-        while (num != -1)
-        {
-            if (num == -2)
-            {
-                file >> num;
-                temp->arrival_time = num;
-                temp->cur_pos = 0;
-                continue;
-            }
-            file >> num;
-            if (num != -1)
-                temp->bursts.push_back(num);
-        }
-        processes.push_back(temp);
+    case "FIFO":
+        cpu0.FIFO(parsed_data,process_file);
+        break;
+    case "NPSJF":
+        cpu0.NPSJF(parsed_data,process_file);
+        break;
+    case "PSJF":
+        cpu0.PSJF(parsed_data,process_file);
+        break;
+    case "RR":
+        cpu0.RR(parsed_data,process_file,10);
+        break;
+    
+    default:
+        break;
     }
-    // for (int i = 0; i < processes.size(); i++)
-    // {
-    //     cout << processes[i]->arrival_time << " ";
-    //     for (auto it : processes[i]->bursts)
-    //     {
-    //         cout << it << " ";
-    //     }
-    //     cout << endl;
-    // }
-    int cur_time = processes[0]->arrival_time;
-    queue<struct pcb_t *> waiting_q;
-    queue<struct pcb_t *> ready_q;
-    ready_q.push(processes[0]);
-    int cur_process = 1;
-    while (!ready_q.empty() || !waiting_q.empty())
-    {
-        //cout<<cur_time<<" ";
-        struct pcb_t *top = ready_q.front();
-        ready_q.pop();
-        if (cur_time < top->arrival_time)
-        {
-            cur_time += top->arrival_time - cur_time;
-        }
-        if(top->cur_pos == 0){
-            top->scheduled_time = cur_time;
-        }
-        cur_time += top->bursts[top->cur_pos];
-        top->cur_pos++;
-        if (top->cur_pos < top->bursts.size())
-        {
-            top->wait_time = cur_time;
-            waiting_q.push(top);
-        }
-        else{
-            top->completion_time = cur_time;
-        }
 
-        for (; cur_process < processes.size(); cur_process++)
-        {
-            if (processes[cur_process]->arrival_time <= cur_time)
-            {
-                ready_q.push(processes[cur_process]);
-            }
-            else
-            {
-                break;
-            }
-        }
-        while (!waiting_q.empty())
-        {
-            struct pcb_t *top = waiting_q.front();
-            if (top->wait_time + top->bursts[top->cur_pos] <= cur_time)
-            {
-                waiting_q.pop();
-                top->cur_pos++;
-                if (top->cur_pos < top->bursts.size())
-                {
-                    ready_q.push(top);
-                }
-            }
-            else{
-                break;
-            }
-        }
-    }
-    float avg_completion_time = 0;
-    int max_completion_time = 0;
-    float avg_waiting_time = 0;
-    int max_waiting_time = 0;
-
-    for(auto it: processes){
-        int total_completion_time =it->completion_time - it->arrival_time;
-        int cpu_time = 0;
-        for(int i = 0; i<it->bursts.size(); i+= 1){
-            cpu_time += it->bursts[i];
-        }
-        int waiting_time = total_completion_time - cpu_time;
-        //cout<<total_completion_time<<endl;
-        if(max_waiting_time<waiting_time){
-            max_waiting_time = waiting_time;
-        }
-        avg_waiting_time += waiting_time;
-        if(max_completion_time < total_completion_time){
-            max_completion_time = total_completion_time;
-        }
-        avg_completion_time += total_completion_time;
-    }
-    avg_completion_time /= processes.size();
-    avg_waiting_time /= processes.size();
-    cout<<"Max Completion time: "<<max_completion_time<<endl;
-    cout<<"Average Completion time: "<<avg_completion_time<<endl;
-    cout<<"Max Waiting time: "<<max_waiting_time<<endl;
-    cout<<"Average Waiting time: "<<avg_waiting_time<<endl;
     return 0;
 }
