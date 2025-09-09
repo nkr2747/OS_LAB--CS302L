@@ -64,18 +64,23 @@ int main(int argc, char *argv[])
     Processor cpu0;
     string algo = scheduling_algorithm;
     //display(parsed_data);
-    switch (algo)
+    unordered_map<string,int> mpp;
+    mpp["FIFO"] = 1;
+    mpp["NPSJF"] = 2;
+    mpp["PSJF"] = 3;
+    mpp["RR"] = 4;
+    switch (mpp[algo])
     {
-    case "FIFO":
+    case 1:
         cpu0.FIFO(parsed_data,process_file);
         break;
-    case "NPSJF":
+    case 2:
         cpu0.NPSJF(parsed_data,process_file);
         break;
-    case "PSJF":
+    case 3:
         cpu0.PSJF(parsed_data,process_file);
         break;
-    case "RR":
+    case 4:
         cpu0.RR(parsed_data,process_file,10);
         break;
     
