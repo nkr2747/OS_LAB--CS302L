@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     if (argc != 3)
     {
         // cout<<argc;
-        cout << "Invalid format!\nIt should be in:-\n";
+        cout << "Invalid format!\n It should be in:-\n";
         cout << "./main <scheduler-type>(FIFO/NPSJF/PSJF/RR) <test-file>";
         return 0;
     }
@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
     case 4:
         cpu0.RR(parsed_data,process_file,10);
         break;
-    
     default:
         break;
     }
