@@ -1,7 +1,7 @@
 #include <iostream>
 #include <bits/stdc++.h>
 #include <fstream>
-#include "Processor.h"
+#include "Classes/Processor.h"
 //#include "MultiCoreProcessor.h"
 using namespace std;
 
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     vector<Process *> parsed_data = parser(process_file);
     Processor cpu0;
     MultiCoreProcessor cpu1;
-    cpu1.FIFO(parsed_data,process_file);
+    cpu1.NPSJF(parsed_data,process_file);
     return 0;
     string algo = scheduling_algorithm;
     //display(parsed_data);

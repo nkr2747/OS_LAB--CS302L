@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include "Processor.h"
+#include "Classes/Processor.h"
 #include <fstream>
 #include <queue>
 #include <string>
@@ -625,5 +625,313 @@ void MultiCoreProcessor::FIFO(vector<Process *> parsed_data, char *process_file)
     // output << "Maximum TAT: " << maxTAT << endl;
     // output << "Average TAT: " << avgTAT / (float)parsed_data.size();
     // output.close();
+    return;
+}
+
+void MultiCoreProcessor::NPSJF(vector<Process*> parsed_data, char *process_file){
+    ofstream output1;
+
+    string filename = process_file;
+    string timeline1 = "ScheduleMC(NPSJF)";
+ 
+    timeline1 += filename[7];
+
+    timeline1 += ".txt";
+
+    output1.open(timeline1);
+
+
+    int time = parsed_data[0]->arrival-1;
+    priority_queue<pair<int,Process *>,vector<pair<int,Process*>>,greater<pair<int,Process*>>> ready;
+    vector<string> ans0;
+    vector<string> ans1;
+    priority_queue<pair<int,Process *>,vector<pair<int,Process*>>,greater<pair<int,Process*>>> waiting;
+    ready.push({parsed_data[0]->bursts[0],parsed_data[0]});
+    int i = 1;
+    int maxTAT = 0;
+    float avgTAT = 0;
+    int run1 = 0;
+    Process *p1 = NULL;
+    Process *p2 = NULL;
+    int run2 = 0;
+    string temp1 = "";
+    string temp2 = "";
+    while (!ready.empty() || !waiting.empty() || run1 != 0 || run2 != 0)
+    {
+        time++;
+        if (run1 > 0){
+            run1--;
+        }
+        if (run2 > 0){
+            run2--;
+        }
+        for (; i < parsed_data.size(); i++)
+        {
+            if (parsed_data[i]->arrival <= time)
+            {
+                ready.push({parsed_data[i]->bursts[0],parsed_data[i]});
+            }
+            else
+                break;
+        }
+        while (!waiting.empty())
+        {
+            Process *top = waiting.top().second;
+            int index = top->index;
+            int ioBurst = top->bursts[index];
+            int last = top->wait;
+            if (last + ioBurst <= time)
+            {
+                top->index++;
+                waiting.pop();
+                ready.push({top->bursts[top->index],top});
+            }
+            else
+            {
+                break;
+            }
+        }
+        if (run1 == 0)
+        {
+            if (p1)
+            {
+                int ind = p1->index;
+                ind += 1;
+                temp1 += to_string(time-1);
+                ans0.push_back(temp1);
+                temp1 = "";
+                if (ind < p1->bursts.size())
+                {
+                    p1->index = ind;
+                    p1->wait = time;
+                    
+                    waiting.push({time+p1->bursts[ind],p1});
+                }
+                else
+                {
+                    p1->completion = time;
+                }
+            }
+            p1 = NULL;
+            if (!ready.empty())
+            {
+                Process *top = ready.top().second;
+                ready.pop();
+                int index = top->index;
+                run1 = top->bursts[index];
+                p1 = top;
+                temp1 += "P";
+                temp1 += to_string(p1->p_no);
+                temp1 += ",";
+                temp1 += to_string((p1->index / 2) + 1);
+                temp1 += "      ";
+                temp1 += to_string(time);
+                temp1 += "      ";
+            }
+        }
+        if (run2 == 0)
+        {
+            if (p2)
+            {
+                int ind = p2->index;
+                ind += 1;
+                temp2 += to_string(time-1);
+                ans1.push_back(temp2);
+                temp2 = "";
+                if (ind < p2->bursts.size())
+                {
+                    p2->index = ind;
+                    p2->wait = time;
+                    
+                    waiting.push({time+p2->bursts[ind],p2});
+                }
+                else
+                {
+                    p2->completion = time;
+                }
+            }
+            p2 = NULL;
+            if (!ready.empty())
+            {
+                Process *top = ready.top().second;
+                ready.pop();
+                int index = top->index;
+                run2 = top->bursts[index];
+                p2 = top;
+                temp2 += "P";
+                temp2 += to_string(p2->p_no);
+                temp2 += ",";
+                temp2 += to_string((p2->index / 2) + 1);
+                temp2 += "      ";
+                temp2 += to_string(time);
+                temp2 += "      ";
+            }
+        }
+    }
+    output1 <<"CPU0\n";
+    for(int i = 0; i< ans0.size(); i++){
+        output1 << ans0[i] <<endl;
+    }
+    output1 <<"CPU1\n";
+    for(int i = 0; i< ans1.size(); i++){
+        output1 << ans1[i] <<endl;
+    }
+    cout <<"Time: "<< time << endl;
+    output1.close();
+    return;
+
+}
+
+void MultiCoreProcessor::NPSJF(vector<Process*> parsed_data, char *process_file){
+    ofstream output1;
+
+    string filename = process_file;
+    string timeline1 = "ScheduleMC(PSJF)";
+ 
+    timeline1 += filename[7];
+
+    timeline1 += ".txt";
+
+    output1.open(timeline1);
+
+
+    int time = parsed_data[0]->arrival-1;
+    priority_queue<pair<int,Process *>,vector<pair<int,Process*>>,greater<pair<int,Process*>>> ready;
+    vector<string> ans0;
+    vector<string> ans1;
+    priority_queue<pair<int,Process *>,vector<pair<int,Process*>>,greater<pair<int,Process*>>> waiting;
+    ready.push({parsed_data[0]->bursts[0],parsed_data[0]});
+    int i = 1;
+    int maxTAT = 0;
+    float avgTAT = 0;
+    int run1 = 0;
+    Process *p1 = NULL;
+    Process *p2 = NULL;
+    int run2 = 0;
+    string temp1 = "";
+    string temp2 = "";
+    while (!ready.empty() || !waiting.empty() || run1 != 0 || run2 != 0)
+    {
+        time++;
+        if (run1 > 0){
+            run1--;
+        }
+        if (run2 > 0){
+            run2--;
+        }
+
+        for (; i < parsed_data.size(); i++)
+        {
+            if (parsed_data[i]->arrival <= time)
+            {
+                ready.push({parsed_data[i]->bursts[0],parsed_data[i]});
+            }
+            else
+                break;
+        }
+        while (!waiting.empty())
+        {
+            Process *top = waiting.top().second;
+            int index = top->index;
+            int ioBurst = top->bursts[index];
+            int last = top->wait;
+            if (last + ioBurst <= time)
+            {
+                top->index++;
+                waiting.pop();
+                ready.push({top->bursts[top->index],top});
+            }
+            else
+            {
+                break;
+            }
+        }
+        if (run1 == 0)
+        {
+            if (p1)
+            {
+                int ind = p1->index;
+                ind += 1;
+                temp1 += to_string(time-1);
+                ans0.push_back(temp1);
+                temp1 = "";
+                if (ind < p1->bursts.size())
+                {
+                    p1->index = ind;
+                    p1->wait = time;
+                    
+                    waiting.push({time+p1->bursts[ind],p1});
+                }
+                else
+                {
+                    p1->completion = time;
+                }
+            }
+            p1 = NULL;
+            if (!ready.empty())
+            {
+                Process *top = ready.top().second;
+                ready.pop();
+                int index = top->index;
+                run1 = top->bursts[index];
+                p1 = top;
+                temp1 += "P";
+                temp1 += to_string(p1->p_no);
+                temp1 += ",";
+                temp1 += to_string((p1->index / 2) + 1);
+                temp1 += "      ";
+                temp1 += to_string(time);
+                temp1 += "      ";
+            }
+        }
+        if (run2 == 0)
+        {
+            if (p2)
+            {
+                int ind = p2->index;
+                ind += 1;
+                temp2 += to_string(time-1);
+                ans1.push_back(temp2);
+                temp2 = "";
+                if (ind < p2->bursts.size())
+                {
+                    p2->index = ind;
+                    p2->wait = time;
+                    
+                    waiting.push({time+p2->bursts[ind],p2});
+                }
+                else
+                {
+                    p2->completion = time;
+                }
+            }
+            p2 = NULL;
+            if (!ready.empty())
+            {
+                Process *top = ready.top().second;
+                ready.pop();
+                int index = top->index;
+                run2 = top->bursts[index];
+                p2 = top;
+                temp2 += "P";
+                temp2 += to_string(p2->p_no);
+                temp2 += ",";
+                temp2 += to_string((p2->index / 2) + 1);
+                temp2 += "      ";
+                temp2 += to_string(time);
+                temp2 += "      ";
+            }
+        }
+    }
+    output1 <<"CPU0\n";
+    for(int i = 0; i< ans0.size(); i++){
+        output1 << ans0[i] <<endl;
+    }
+    output1 <<"CPU1\n";
+    for(int i = 0; i< ans1.size(); i++){
+        output1 << ans1[i] <<endl;
+    }
+    cout <<"Time: "<< time << endl;
+    output1.close();
     return;
 }

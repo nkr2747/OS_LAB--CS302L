@@ -5,6 +5,14 @@
 #include <signal.h>
 
 using namespace std;
+void handler(int sign)
+{
+	if (sign == SIGUSR1)
+	{
+		cout<<"["<<getpid()<<"] received SIGTERM"<<endl;
+		kill(getpid(),SIGTERM);
+	}
+}
 
 void handler(int sign)
 {
@@ -18,6 +26,7 @@ void handler(int sign)
 
 int main(int argc, char **argv)
 {
+    signal(SIGUSR1, handler);
 
     signal(SIGUSR1, handler);
     if (argc != 6)
