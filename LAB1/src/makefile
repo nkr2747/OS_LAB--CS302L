@@ -18,4 +18,4 @@ run-sharpen: $(TARGET)
 	$(TARGET) ..\images\$(INPUT).ppm ..\images\$(OUTPUT).ppm
 
 clean:
-	del /Q $(TARGET)
+	rm $(TARGET) ..\images\$(OUTPUT).ppm

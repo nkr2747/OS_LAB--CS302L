@@ -435,7 +435,7 @@ int main(int argc, char **argv)
 
 
 	start =chrono::high_resolution_clock::now();
-	write_ppm_file(argv[2], sharpened_image);
+	write_ppm_file(argv[2], details_image);
 	end =chrono::high_resolution_clock::now();
 	duration =chrono::duration_cast<chrono::milliseconds>(end - start);
 	cout<<"execution time for writing ppm file: "<< duration.count() <<" ms"<< endl;

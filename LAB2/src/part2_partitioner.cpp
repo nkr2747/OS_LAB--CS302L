@@ -48,8 +48,13 @@ int main(int argc, char **argv)
 			// i think this one block is for left child
 			cur_chunk_size = cur_chunk_size / 2;
 			search_end_position = search_start_position + cur_chunk_size - 1;
+<<<<<<< HEAD
 		}
 		cout << "[" << getpid() << "] start position = " << search_start_position << " ; end position = " << search_end_position << endl;
+=======
+			cout << "[" << getpid() << "] start position = " << search_start_position << " ; end position = " << search_end_position << endl;
+		}
+>>>>>>> c006351cdb0f958c6fbdf995833df8730d5edc20
 		if (pid1 != 0 && pid2 != 0)
 		{
 			waitpid(pid1, NULL, 0);
@@ -62,8 +67,9 @@ int main(int argc, char **argv)
 	}
 	const char *program_path = "./part2_searcher";
 
-	// Arguments to pass to the program (first argument is the program name itself)
-	// The list must be terminated by a NULL pointer.
+	// first me name hota hai
+	// last me null hota hai
+	// bich me sare arguements
 	string start_str = to_string(search_start_position);
 	string end_str = to_string(search_end_position);
 	pid_t searcher_child = fork();
