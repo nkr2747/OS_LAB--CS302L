@@ -2,8 +2,10 @@
 #include <bits/stdc++.h>
 #include <fstream>
 #include "Classes/Processor.h"
-//#include "classes/MultiCoreProcessor.h"
+#include "chrono"
+// #include "classes/MultiCoreProcessor.h"
 using namespace std;
+using namespace std::chrono;
 
 vector<Process *> parser(string location)
 {
@@ -62,33 +64,64 @@ int main(int argc, char *argv[])
     char *process_file = argv[2];
     char *scheduling_algorithm = argv[1];
     vector<Process *> parsed_data = parser(process_file);
-    //Processor cpu0;
+    // Processor cpu0;
     MultiCoreProcessor cpu0;
-    cpu0.RR(parsed_data,process_file,10);
-    //cpu0.FIFO(parsed_data,process_file);
-    return 0;
+    // cpu0.RR(parsed_data,process_file,10);
+    // //cpu0.FIFO(parsed_data,process_file);
+    // return 0;
     string algo = scheduling_algorithm;
-    //display(parsed_data);
-    unordered_map<string,int> mpp;
+    // display(parsed_data);
+    unordered_map<string, int> mpp;
     mpp["FIFO"] = 1;
     mpp["NPSJF"] = 2;
-    mpp["PSJF"] = 3;
+    // mpp["PSJF"] = 3;
     mpp["RR"] = 4;
     switch (mpp[algo])
     {
     case 1:
-        cpu0.FIFO(parsed_data,process_file);
+    {
+        auto start = high_resolution_clock::now();
+        cpu0.FIFO(parsed_data, process_file);
+        auto stop = high_resolution_clock::now(); // stop time
+
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout << "Total runtime: " << duration.count() << " microseconds" << endl;
         break;
+    }
     case 2:
-        cpu0.NPSJF(parsed_data,process_file);
+    {
+        auto start = high_resolution_clock::now();
+        cpu0.NPSJF(parsed_data, process_file);
+        auto stop = high_resolution_clock::now(); // stop time
+
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout << "Total runtime: " << duration.count() << " microseconds" << endl;
+
         break;
-    case 3:
-        cpu0.PSJF(parsed_data,process_file);
-        break;
+    }
+    // case 3:
+    // {
+    //     auto start = high_resolution_clock::now();
+    //     cpu0.PSJF(parsed_data, process_file);
+    //     auto stop = high_resolution_clock::now(); // stop time
+
+    //     auto duration = duration_cast<microseconds>(stop - start);
+    //     cout << "Total runtime: " << duration.count() << " microseconds" << endl;
+
+    //     break;
+    // }
     case 4:
-        cpu0.RR(parsed_data,process_file,10);
+    {
+        auto start = high_resolution_clock::now();
+        cpu0.RR(parsed_data, process_file, 10);
+        auto stop = high_resolution_clock::now(); // stop time
+
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout << "Total runtime: " << duration.count() << " microseconds" << endl;
+
         break;
-    
+    }
+
     default:
         break;
     }

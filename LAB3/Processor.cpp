@@ -1085,14 +1085,8 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
                 vec1.push_back(temp1);
                 //output1 << time  << endl;
                 run1.cur->index++;
-<<<<<<< HEAD
                 if (run1.cur->index < run1.cur->bursts.size()){
                     waiting.push(make_pair(time + 1 + run1.cur->bursts[run1.cur->index], run1.cur));
-=======
-                if (run1.cur->index < run1.cur->bursts.size())
-                {
-                    waiting.push({time + 1 + run1.cur->bursts[run1.cur->index], run1.cur});
->>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
                 }
                 else{
                     run1.cur->completion = time+1;
@@ -1104,13 +1098,8 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
                 temp1 += to_string(time);
                 temp1 += "\n";
                 vec1.push_back(temp1);
-<<<<<<< HEAD
                 //output1 << time  << endl;
                 ready.push(make_pair(run1.run, run1.cur));
-=======
-                // output1 << time  << endl;
-                ready.push({run1.run, run1.cur});
->>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
                 run1.cur = nullptr;
             }
         }
@@ -1127,14 +1116,8 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
                 vec2.push_back(temp2);
                 //output2 << time  << endl;
                 run2.cur->index++;
-<<<<<<< HEAD
                 if (run2.cur->index < run2.cur->bursts.size()){
                     waiting.push(make_pair(time + 1 + run2.cur->bursts[run2.cur->index], run2.cur));
-=======
-                if (run2.cur->index < run2.cur->bursts.size())
-                {
-                    waiting.push({time + 1 + run2.cur->bursts[run2.cur->index], run2.cur});
->>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
                 }
                 else{
                     run2.cur->completion = time + 1;
@@ -1146,13 +1129,8 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
                 temp2 += to_string(time);
                 temp2 += "\n";
                 vec2.push_back(temp2);
-<<<<<<< HEAD
                 //output2 << time  << endl;
                 ready.push(make_pair(run2.run, run2.cur));
-=======
-                // output2 << time  << endl;
-                ready.push({run2.run, run2.cur});
->>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
                 run2.cur = nullptr;
             }
         }
@@ -1199,17 +1177,8 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
         maxTAT = max(maxTAT, TAT);
         turnAround += TAT;
     }
-<<<<<<< HEAD
     cout<< "Average Turnaround Time: "<<turnAround/n<<endl;
     cout<< "Maximum Turnaround Time: "<<maxTAT<<endl;
-=======
-    cout << "Average Turnaround Time: " << turnAround / n << endl;
-    cout << "Maximum Turnaround Time: " << maxTAT << endl;
-
-    auto idle = countGapsMC(fileName);
-    cout << "Runtime of Simulator(CPU1): " << time - idle.first << endl;
-    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl;
->>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
     return;
 }
 
