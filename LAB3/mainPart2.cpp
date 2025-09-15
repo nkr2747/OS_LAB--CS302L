@@ -62,10 +62,11 @@ int main(int argc, char *argv[])
     char *process_file = argv[2];
     char *scheduling_algorithm = argv[1];
     vector<Process *> parsed_data = parser(process_file);
-    Processor cpu0;
-    MultiCoreProcessor cpu1;
-    cpu1.NPSJF(parsed_data,process_file);
-    return 0;
+    //Processor cpu0;
+    MultiCoreProcessor cpu0;
+    // cpu0.RR(parsed_data,process_file,10);
+    //cpu0.FIFO(parsed_data,process_file);
+    //return 0;
     string algo = scheduling_algorithm;
     //display(parsed_data);
     unordered_map<string,int> mpp;

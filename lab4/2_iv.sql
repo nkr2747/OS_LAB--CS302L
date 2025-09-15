@@ -1,0 +1,1 @@
+SELECT temp.course_id, title, cnt from (SELECT t.course_id, count(course_id) as cnt from student as s, takes as t where s.ID = t.ID and dept_name = "Comp. Sci." and year = 2017 and semester = "Fall" group by course_id) as temp , course where temp.course_id = course.course_id and cnt > 1 order by temp.course_id asc;
