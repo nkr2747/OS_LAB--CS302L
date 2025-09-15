@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     vector<Process *> parsed_data = parser(process_file);
     Processor cpu0;
     MultiCoreProcessor cpu1;
-    cpu1.NPSJF(parsed_data,process_file);
+    cpu0.PSJF(parsed_data,process_file);cd 
     return 0;
     string algo = scheduling_algorithm;
     //display(parsed_data);
