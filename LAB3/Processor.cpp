@@ -60,9 +60,11 @@ void display(vector<Process *> parsed_data)
     }
 }
 
-int countGaps(string& filename) {
+int countGaps(string &filename)
+{
     ifstream file(filename);
-    if (!file.is_open()) {
+    if (!file.is_open())
+    {
         cerr << "Error: Cannot open file " << filename << endl;
         return -1;
     }
@@ -72,9 +74,11 @@ int countGaps(string& filename) {
     int gap_count = 0;
     bool first_line = true;
 
-    while (getline(file, line)) {
-        if (first_line) {
-            
+    while (getline(file, line))
+    {
+        if (first_line)
+        {
+
             first_line = false;
             continue;
         }
@@ -85,9 +89,10 @@ int countGaps(string& filename) {
 
         iss >> process_info >> start >> end;
 
-        if (prev_end != -1 && (start - prev_end > 1)) {
-            //cout<<start<<"  "<<prev_end<<endl;
-            gap_count += start - prev_end-1;
+        if (prev_end != -1 && (start - prev_end > 1))
+        {
+            // cout<<start<<"  "<<prev_end<<endl;
+            gap_count += start - prev_end - 1;
         }
 
         prev_end = end;
@@ -96,11 +101,13 @@ int countGaps(string& filename) {
     file.close();
     return gap_count;
 }
-pair<int,int> countGapsMC(string& filename) {
+pair<int, int> countGapsMC(string &filename)
+{
     ifstream file(filename);
-    if (!file.is_open()) {
+    if (!file.is_open())
+    {
         cerr << "Error: Cannot open file " << filename << endl;
-        return {-1,-1};
+        return {-1, -1};
     }
 
     string line;
@@ -108,13 +115,16 @@ pair<int,int> countGapsMC(string& filename) {
     int gap_count = 0;
     bool first_line = true;
 
-    while (getline(file, line)) {
-        if (first_line) {
-            
+    while (getline(file, line))
+    {
+        if (first_line)
+        {
+
             first_line = false;
             continue;
         }
-        else if(line == "CPU1") break;
+        else if (line == "CPU1")
+            break;
 
         istringstream iss(line);
         string process_info;
@@ -122,9 +132,10 @@ pair<int,int> countGapsMC(string& filename) {
 
         iss >> process_info >> start >> end;
 
-        if (prev_end != -1 && (start - prev_end > 1)) {
-            //cout<<start<<"  "<<prev_end<<endl;
-            gap_count += start - prev_end-1;
+        if (prev_end != -1 && (start - prev_end > 1))
+        {
+            // cout<<start<<"  "<<prev_end<<endl;
+            gap_count += start - prev_end - 1;
         }
 
         prev_end = end;
@@ -132,24 +143,25 @@ pair<int,int> countGapsMC(string& filename) {
     int ans1 = gap_count;
     prev_end = -1;
     gap_count = 0;
-    while (getline(file, line)) {
+    while (getline(file, line))
+    {
         istringstream iss(line);
         string process_info;
         int start, end;
 
         iss >> process_info >> start >> end;
 
-        if (prev_end != -1 && (start - prev_end > 1)) {
-            //cout<<start<<"  "<<prev_end<<endl;
-            gap_count += start - prev_end-1;
+        if (prev_end != -1 && (start - prev_end > 1))
+        {
+            // cout<<start<<"  "<<prev_end<<endl;
+            gap_count += start - prev_end - 1;
         }
 
         prev_end = end;
     }
     file.close();
-    return {ans1,gap_count};
+    return {ans1, gap_count};
 }
-
 
 void Processor::FIFO(vector<Process *> parsed_data, char *process_file)
 {
@@ -1003,165 +1015,256 @@ void MultiCoreProcessor::NPSJF(vector<Process *> parsed_data, char *process_file
     return;
 }
 
-void MultiCoreProcessor::PSJF(vector<Process *> parsed_data, char *process_file)
-{
-    ofstream file1;
-    file1.open("trial1.txt");
-    ofstream file2;
-    file2.open("trial2.txt");
 
-    if (parsed_data.empty())
-        return;
+vector<string> mergeProcessIntervals(const vector<string>& inputLines) {
+    vector<string> merged;
 
-    int time = parsed_data[0]->arrival;
-    int n = parsed_data.size();
-    int i = 0;
+    string prevKey = "";
+    int startTime = -1;
+    int lastTime = -1;
 
-    // Priority queues:
-    // ready queue holds (remaining_burst_time, Process*)
-    // waiting queue holds (waiting_end_time, Process*)
-    priority_queue<pair<int, Process *>, vector<pair<int, Process *>>, greater<pair<int, Process *>>> ready;
-    priority_queue<pair<int, Process *>, vector<pair<int, Process *>>, greater<pair<int, Process *>>> waiting;
+    for (const string& line : inputLines) {
+        if (line.empty()) continue;
 
-    // Push all processes that have arrived by current time into ready queue
-    for (; i < n; i++)
-    {
-        Process *proc = parsed_data[i];
-        if (proc->arrival <= time)
-            ready.push({proc->bursts[0], proc});
-        else
-            break;
+        stringstream ss(line);
+        string key;
+        int time;
+
+        ss >> key >> time;
+
+        if (key == prevKey && time == lastTime + 1) {
+            // Continuation of the same process block
+            lastTime = time;
+        } else {
+            // Save previous block if it exists
+            if (!prevKey.empty()) {
+                merged.push_back(prevKey + " " + to_string(startTime) + " " + to_string(lastTime));
+            }
+            // Start new block
+            prevKey = key;
+            startTime = time;
+            lastTime = time;
+        }
     }
 
-    time--; // Initialize time one unit before first process starts
+    // Add the final block
+    if (!prevKey.empty()) {
+        merged.push_back(prevKey + " " + to_string(startTime) + " " + to_string(lastTime));
+    }
 
-    Run *run1 = new Run();
-    Run *run2 = new Run();
-    run1->cur = nullptr;
-    run2->cur = nullptr;
+    return merged;
+}
 
-    while (!ready.empty() || !waiting.empty())
+void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_file)
+{
+    using PQ = priority_queue<pair<int, Process *>, vector<pair<int, Process *>>, greater<pair<int, Process *>>>;
+    int time = parsed_data[0]->arrival;
+    int i = 0;
+    int n = parsed_data.size();
+    PQ ready;
+    PQ waiting;
+    string fileName = "ScheduleMC(PSJF)";
+    fileName += process_file[7];
+    fileName += ".txt";
+    ofstream file;
+    ofstream file1;
+    ofstream file2;
+    file.open(fileName);
+    file1.open("0.txt");
+    file2.open("1.txt");
+    vector<string> vec1;
+    vector<string> vec2;
+    string temp1 = "";
+    string temp2 = "";
+    
+    // Initialize: Add all processes that have arrived at the start time
+    while (i < n && time >= parsed_data[i]->arrival)
     {
-        time++;
-
-        // Push processes that arrive at this time to ready queue
-        for (; i < n; i++)
-        {
-            Process *proc = parsed_data[i];
-            if (proc->arrival <= time)
-                ready.push({proc->bursts[0], proc});
-            else
-                break;
+        ready.push({parsed_data[i]->bursts[0], parsed_data[i]});
+        i++;
+    }
+    
+    Run run1;
+    Run run2;
+    run1.cur = NULL;
+    run1.left = 0;
+    run2.cur = NULL;
+    run2.left = 0;
+    
+    while (!ready.empty() || !waiting.empty() || run1.cur != NULL || run2.cur != NULL || i < n)
+    {
+        // Check for preemption and reassignment
+        bool needReassign = false;
+        
+        // Collect currently running processes for potential preemption
+        if (run1.cur != NULL && run1.left > 0) {
+            ready.push({run1.left, run1.cur});
+            run1.cur = NULL;
+            run1.left = 0;
+            needReassign = true;
         }
-
-        // Move processes from waiting to ready if their wait time is over
+        if (run2.cur != NULL && run2.left > 0) {
+            ready.push({run2.left, run2.cur});
+            run2.cur = NULL;
+            run2.left = 0;
+            needReassign = true;
+        }
+        
+        // Assign processes to CPUs (preemptive assignment)
+        if (!ready.empty() && run1.cur == NULL) {
+            auto top = ready.top();
+            ready.pop();
+            run1.cur = top.second;
+            run1.left = top.first;
+        }
+        if (!ready.empty() && run2.cur == NULL) {
+            auto top = ready.top();
+            ready.pop();
+            run2.cur = top.second;
+            run2.left = top.first;
+        }
+        
+        // CPU0 execution
+        if (run1.cur != NULL)
+        {
+            run1.left--;
+            temp1 = "P";
+            temp1 += to_string(run1.cur->p_no);
+            temp1 += ",";
+            temp1 += to_string((run1.cur->index/2)+1);
+            temp1 += "  ";
+            temp1 += to_string(time);
+            vec1.push_back(temp1);
+            file1 << "P" << run1.cur->p_no << "," << (run1.cur->index/2)+1 << "   " << time <<  endl;
+            
+            if (run1.left <= 0)
+            {
+                // CPU burst completed
+                int ind = run1.cur->index;
+                if (ind + 1 < run1.cur->bursts.size())
+                {
+                    // Move to I/O (odd index in bursts array)
+                    run1.cur->index = ind + 1;
+                    // I/O completion time = current time + I/O burst duration
+                    waiting.push({time + run1.cur->bursts[ind+1], run1.cur});
+                }
+                else
+                {
+                    // Process completed
+                    run1.cur->completion = time + 1; // Completion at the end of this time unit
+                }
+                run1.cur = NULL;
+                run1.left = 0;
+            }
+        }
+        else {
+            file1 << "IDLE   " << time << endl;
+        }
+        
+        // CPU1 execution
+        if (run2.cur != NULL)
+        {
+            run2.left--;
+            temp2 = "P";
+            temp2 += to_string(run2.cur->p_no);
+            temp2 += ",";
+            temp2 += to_string((run2.cur->index/2)+1);
+            temp2 += "  ";
+            temp2 += to_string(time);
+            vec2.push_back(temp2);
+            file2 << "P" << run2.cur->p_no << "," << (run2.cur->index/2)+1 << "   " << time << endl;
+            
+            if (run2.left <= 0)
+            {
+                // CPU burst completed
+                int ind = run2.cur->index;
+                if (ind + 1 < run2.cur->bursts.size())
+                {
+                    // Move to I/O (odd index in bursts array)
+                    run2.cur->index = ind + 1;
+                    // I/O completion time = current time + I/O burst duration
+                    waiting.push({time + run2.cur->bursts[ind+1], run2.cur});
+                }
+                else
+                {
+                    // Process completed
+                    run2.cur->completion = time + 1; // Completion at the end of this time unit
+                }
+                run2.cur = NULL;
+                run2.left = 0;
+            }
+        }
+        else {
+            file2 << "IDLE   " << time << endl;
+        }
+        
+        // Advance time
+        time++;
+        
+        // Check for new arrivals
+        while (i < n && time >= parsed_data[i]->arrival)
+        {
+            ready.push({parsed_data[i]->bursts[0], parsed_data[i]});
+            i++;
+        }
+        
+        // Check for I/O completions
         while (!waiting.empty() && waiting.top().first <= time)
         {
-            Process *proc = waiting.top().second;
+            auto top = waiting.top().second;
             waiting.pop();
-            ready.push({proc->bursts[proc->index], proc});
-        }
-
-        if (!ready.empty())
-        {
-            // Extract first shortest burst process
-            pair<int, Process *> topPair1 = ready.top();
-            int left1 = topPair1.first;
-            Process *top1 = topPair1.second;
-            ready.pop();
-
-            int left2 = -1;
-            Process *top2 = nullptr;
-            if (!ready.empty())
+            int ind = top->index;
+            if (ind + 1 < top->bursts.size())
             {
-                pair<int, Process *> topPair2 = ready.top();
-                left2 = topPair2.first;
-                top2 = topPair2.second;
-                ready.pop();
-            }
-
-            // Assign processes to run1 and run2 cores intelligently
-            // Try to keep the same process on the same core if possible
-            if (top1 == run1->cur || top2 == run2->cur)
-            {
-                run1->cur = top1;
-                run1->left = left1;
-                run2->cur = top2;
-                run2->left = left2;
-            }
-            else if (top1 == run2->cur || top2 == run1->cur)
-            {
-                run1->cur = top2;
-                run1->left = left2;
-                run2->cur = top1;
-                run2->left = left1;
-            }
-            else
-            {
-                run1->cur = top1;
-                run1->left = left1;
-                run2->cur = top2;
-                run2->left = left2;
-            }
-
-            // Log the running processes and their burst index to files
-            file1 << "P" << run1->cur->p_no << "," << (run1->cur->index / 2) + 1 << "    " << time << endl;
-            if (run2->cur)
-                file2 << "P" << run2->cur->p_no << "," << (run2->cur->index / 2) + 1 << "    " << time << endl;
-
-            // Decrement the burst time left for each core
-            run1->left--;
-            run2->left--;
-
-            // If run1's process still has burst time left, push it back to ready queue
-            if (run1->left > 0)
-            {
-                ready.push({run1->left, run1->cur});
-            }
-            else
-            {
-                file1 << "      " << time << endl;
-                int ind = run1->cur->index + 1;
-
-                if (ind < (int)run1->cur->bursts.size())
-                {
-                    run1->cur->index = ind;
-                    waiting.push({time + run1->cur->bursts[ind], run1->cur});
-                }
-                else
-                {
-                    run1->cur->completion = time + 1;
-                }
-            }
-
-            // Similarly for run2's process
-            if (run2->left > 0)
-            {
-                ready.push({run2->left, run2->cur});
-            }
-            else if (run2->cur)
-            {
-                file2 << "      " << time << endl;
-                int ind = run2->cur->index + 1;
-
-                if (ind < (int)run2->cur->bursts.size())
-                {
-                    run2->cur->index = ind;
-                    waiting.push({time + run2->cur->bursts[ind], run2->cur});
-                }
-                else
-                {
-                    run2->cur->completion = time + 1;
-                }
+                // Move to next CPU burst (even index in bursts array)
+                top->index = ind + 1;
+                ready.push({top->bursts[top->index], top});
             }
         }
     }
-
+    
+    // Uncomment if you have the mergeProcessIntervals function
+    // vector<string> ans1 = mergeProcessIntervals(vec1);
+    // file << "CPU0\n";
+    // for(auto it: ans1){
+    //     file << it << endl;
+    // }
+    // ans1 = mergeProcessIntervals(vec2);
+    // file << "CPU1\n";
+    // for(auto it: ans1){
+    //     file << it << endl;
+    // }
+    
+    cout << "Simulation completed at time: " << time << endl;
+    
+    
     file1.close();
     file2.close();
+    vector<string> ans = mergeProcessIntervals(vec1);
+    file << "CPU0\n";
+    for(auto it: ans){
+        file << it <<endl;
+    }
+    file << "CPU1\n";
+    ans = mergeProcessIntervals(vec2);
+    for(auto it: ans){
+        file << it <<endl;
+    }
+    file.close();
+    float turnAround = 0;
+    int maxTAT = 0;
+    for (auto it : parsed_data)
+    {
+        int TAT = it->completion - it->arrival;
+        maxTAT = max(maxTAT, TAT);
+        turnAround += TAT;
+    }
+    cout << "Average Turnaround Time: " << turnAround / n << endl;
+    cout << "Maximum Turnaround Time: " << maxTAT << endl;
 
-    delete run1;
-    delete run2;
+    auto idle = countGapsMC(fileName);
+    cout << "Runtime of Simulator(CPU1): " << time - idle.first << endl;
+    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl; 
 }
 
 void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, int timeSlice)
@@ -1302,7 +1405,7 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
         if (run1.cur == nullptr && run2.cur == nullptr)
         {
             idleTime++;
-            //cout<<time<<" ";
+            // cout<<time<<" ";
         }
         // waiting se ready me if possible
         while (!waiting.empty() && waiting.top().first <= time + 1)
@@ -1350,6 +1453,6 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
 
     auto idle = countGapsMC(fileName);
     cout << "Runtime of Simulator(CPU1): " << time - idle.first << endl;
-    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl;
+    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl; 
     return;
 }

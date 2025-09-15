@@ -2,8 +2,10 @@
 #include <bits/stdc++.h>
 #include <fstream>
 #include "Classes/Processor.h"
+#include "chrono"
 //#include "MultiCoreProcessor.h"
 using namespace std;
+using namespace std::chrono;
 
 vector<Process *> parser(string location)
 {
@@ -76,19 +78,38 @@ int main(int argc, char *argv[])
     mpp["RR"] = 4;
     switch (mpp[algo])
     {
-    case 1:
+    case 1:{
+        auto start = high_resolution_clock::now();
         cpu0.FIFO(parsed_data,process_file);
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout << "Total runtime: " << duration.count() << " microseconds" << endl;
         break;
-    case 2:
+    }
+    case 2:{
+        auto start = high_resolution_clock::now();
         cpu0.NPSJF(parsed_data,process_file);
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout << "Total runtime: " << duration.count() << " microseconds" << endl;
         break;
-    case 3:
+    }
+    case 3:{
+        auto start = high_resolution_clock::now();
         cpu0.PSJF(parsed_data,process_file);
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout << "Total runtime: " << duration.count() << " microseconds" << endl;
         break;
-    case 4:
+    }
+    case 4:{
+        auto start = high_resolution_clock::now();
         cpu0.RR(parsed_data,process_file,10);
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout << "Total runtime: " << duration.count() << " microseconds" << endl;
         break;
-    
+    }
     default:
         break;
     }
