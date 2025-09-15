@@ -63,16 +63,7 @@ int main(int argc, char *argv[])
     char *scheduling_algorithm = argv[1];
     vector<Process *> parsed_data = parser(process_file);
     Processor cpu0;
-<<<<<<< HEAD:LAB3/main.cpp
-    MultiCoreProcessor cpu1;
-    cpu0.PSJF(parsed_data,process_file);cd 
-    return 0;
-=======
     // MultiCoreProcessor cpu1;
-    // cpu0.RR(parsed_data,process_file,10);
-    //cpu0.FIFO(parsed_data,process_file);
-    //return 0;
->>>>>>> 1d6518a43fa7f5688ae3f2ff9c541f79a00eecaa:LAB3/mainPart1.cpp
     string algo = scheduling_algorithm;
     //display(parsed_data);
     unordered_map<string,int> mpp;
