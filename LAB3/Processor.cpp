@@ -3,6 +3,7 @@
 #include <vector>
 #include "Classes/Processor.h"
 #include <fstream>
+#include <sstream>
 #include <queue>
 #include <string>
 using namespace std;
@@ -59,8 +60,100 @@ void display(vector<Process *> parsed_data)
     }
 }
 
+int countGaps(string& filename) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Error: Cannot open file " << filename << endl;
+        return -1;
+    }
+
+    string line;
+    int prev_end = -1;
+    int gap_count = 0;
+    bool first_line = true;
+
+    while (getline(file, line)) {
+        if (first_line) {
+            
+            first_line = false;
+            continue;
+        }
+
+        istringstream iss(line);
+        string process_info;
+        int start, end;
+
+        iss >> process_info >> start >> end;
+
+        if (prev_end != -1 && (start - prev_end > 1)) {
+            //cout<<start<<"  "<<prev_end<<endl;
+            gap_count += start - prev_end-1;
+        }
+
+        prev_end = end;
+    }
+
+    file.close();
+    return gap_count;
+}
+pair<int,int> countGapsMC(string& filename) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Error: Cannot open file " << filename << endl;
+        return {-1,-1};
+    }
+
+    string line;
+    int prev_end = -1;
+    int gap_count = 0;
+    bool first_line = true;
+
+    while (getline(file, line)) {
+        if (first_line) {
+            
+            first_line = false;
+            continue;
+        }
+        else if(line == "CPU1") break;
+
+        istringstream iss(line);
+        string process_info;
+        int start, end;
+
+        iss >> process_info >> start >> end;
+
+        if (prev_end != -1 && (start - prev_end > 1)) {
+            //cout<<start<<"  "<<prev_end<<endl;
+            gap_count += start - prev_end-1;
+        }
+
+        prev_end = end;
+    }
+    int ans1 = gap_count;
+    prev_end = -1;
+    gap_count = 0;
+    while (getline(file, line)) {
+        istringstream iss(line);
+        string process_info;
+        int start, end;
+
+        iss >> process_info >> start >> end;
+
+        if (prev_end != -1 && (start - prev_end > 1)) {
+            //cout<<start<<"  "<<prev_end<<endl;
+            gap_count += start - prev_end-1;
+        }
+
+        prev_end = end;
+    }
+    file.close();
+    return {ans1,gap_count};
+}
+
+
 void Processor::FIFO(vector<Process *> parsed_data, char *process_file)
 {
+    using pr = pair<int, Process *>;
     ofstream output;
     string filename = process_file;
     string timeline = "Schedule(FIFO)";
@@ -69,39 +162,47 @@ void Processor::FIFO(vector<Process *> parsed_data, char *process_file)
     output.open(timeline);
     int time = parsed_data[0]->arrival;
     queue<Process *> ready;
-    queue<Process *> waiting;
+    priority_queue<pr, vector<pr>, greater<pr>> waiting;
     ready.push(parsed_data[0]);
     int i = 1;
     int maxTAT = 0;
     float avgTAT = 0;
+    int idleTime = 0;
     output << "CPU0\n";
     while (!ready.empty() || !waiting.empty())
     {
-        Process *cur = ready.front();
-        ready.pop();
-        int ind = cur->index;
-        output << "P" << to_string(cur->p_no) << "," << to_string((ind / 2) + 1) << "     " << time << "      ";
-
-        time += cur->bursts[ind];
-        output << time - 1 << endl;
-        ind += 1;
-        if (ind < cur->bursts.size())
+        if (!ready.empty())
         {
-            cur->index = ind;
-            cur->wait = time;
-            waiting.push(cur);
+            Process *cur = ready.front();
+            ready.pop();
+            int ind = cur->index;
+            output << "P" << to_string(cur->p_no) << "," << to_string((ind / 2) + 1) << "     " << time << "      ";
+            time += cur->bursts[ind];
+            output << time - 1 << endl;
+            ind += 1;
+            if (ind < cur->bursts.size())
+            {
+                cur->index = ind;
+                cur->wait = time;
+                waiting.push({time + cur->bursts[ind], cur});
+            }
+            else
+            {
+                cur->completion = time;
+                avgTAT += cur->completion - cur->arrival;
+                maxTAT = max(maxTAT, cur->completion - cur->arrival);
+            }
         }
         else
         {
-            cur->completion = time;
-            avgTAT += cur->completion - cur->arrival;
-            maxTAT = max(maxTAT, cur->completion - cur->arrival);
+            time++;
+            idleTime++;
         }
-        // maybe yahan pe main priority queue add karunga kyuki nikalne me eeasy hoga.
+        // maybe yahan pe main priority queue add karunga kyuki nikalne me eeasy hoga. -- kar diya PQ
         while (!waiting.empty())
         {
-            Process *top = waiting.front();
-            if (time - top->wait >= top->bursts[top->index])
+            Process *top = waiting.top().second;
+            if (time >= waiting.top().first)
             {
                 waiting.pop();
                 if (top->index + 1 < top->bursts.size())
@@ -130,7 +231,8 @@ void Processor::FIFO(vector<Process *> parsed_data, char *process_file)
     cout << "Scheduling Algorithm: FIFO\n";
     cout << "Time to Complete: " << time << endl;
     cout << "Maximum TAT: " << maxTAT << endl;
-    cout << "Average TAT: " << avgTAT / (float)parsed_data.size();
+    cout << "Average TAT: " << avgTAT / (float)parsed_data.size() << endl;
+    cout << "Runtime of Simulator: " << time - idleTime << endl;
     output.close();
     return;
 }
@@ -146,7 +248,7 @@ void Processor::NPSJF(vector<Process *> parsed_data, char *process_file)
     int time = parsed_data[0]->arrival;
 
     priority_queue<pair<int, Process *>, vector<pair<int, Process *>>, greater<pair<int, Process *>>> ready;
-    queue<Process *> waiting;
+    priority_queue<pair<int, Process *>, vector<pair<int, Process *>>, greater<pair<int, Process *>>> waiting;
 
     int i = 0;
     for (; i < parsed_data.size(); i++)
@@ -162,6 +264,7 @@ void Processor::NPSJF(vector<Process *> parsed_data, char *process_file)
     }
     int maxTAT = 0;
     float avgTAT = 0;
+    int idleTime = 0;
     output << "CPU0\n";
     while (!ready.empty() || !waiting.empty())
     {
@@ -180,7 +283,7 @@ void Processor::NPSJF(vector<Process *> parsed_data, char *process_file)
             {
                 cur->index = ind;
                 cur->wait = time;
-                waiting.push(cur);
+                waiting.push({time + cur->bursts[ind], cur});
             }
             else
             {
@@ -192,15 +295,19 @@ void Processor::NPSJF(vector<Process *> parsed_data, char *process_file)
         }
         else
         {
-            Process *top = waiting.front();
+            Process *top = waiting.top().second;
             if (time - top->wait < top->bursts[top->index])
             {
+                // cout<<time<<"--";
+                int t = time;
                 time = top->bursts[top->index] + top->wait;
+                int incTime = time - t;
+                idleTime += incTime;
             }
         }
         while (!waiting.empty())
         {
-            Process *top = waiting.front();
+            Process *top = waiting.top().second;
             if (time - top->wait >= top->bursts[top->index])
             {
                 waiting.pop();
@@ -227,11 +334,13 @@ void Processor::NPSJF(vector<Process *> parsed_data, char *process_file)
             }
         }
     }
+    output.close();
     cout << "Scheduling Algorithm: NPSJF\n";
     cout << "Time to Complete: " << time << endl;
     cout << "Maximum TAT: " << maxTAT << endl;
-    cout << "Average TAT: " << avgTAT / (float)parsed_data.size();
-    output.close();
+    cout << "Average TAT: " << avgTAT / (float)parsed_data.size() << endl;
+    int h = countGaps(timeline);
+    cout << "Runtime of Simulator: " << time - h << endl;
     return;
 }
 
@@ -246,7 +355,7 @@ void Processor::PSJF(vector<Process *> parsed_data, char *process_file)
     output.open(timeline);
     // int time = parsed_data[0]->arrival;
     int time = 0;
-
+    int idleTime = 0;
     priority_queue<pair<int, Process *>, vector<pair<int, Process *>>, greater<pair<int, Process *>>> ready;
     priority_queue<pair<int, Process *>, vector<pair<int, Process *>>, greater<pair<int, Process *>>> waiting;
     pair<int, int> prev = {-1, -1};
@@ -310,6 +419,7 @@ void Processor::PSJF(vector<Process *> parsed_data, char *process_file)
         }
         else
         {
+            idleTime++;
             time++;
         }
         while (i < parsed_data.size())
@@ -356,7 +466,9 @@ void Processor::PSJF(vector<Process *> parsed_data, char *process_file)
     cout << "Scheduling Algorithm: PSJF\n";
     cout << "Time to Complete: " << time << endl;
     cout << "Maximum TAT: " << maxTAT << endl;
-    cout << "Average TAT: " << avgTAT / (float)parsed_data.size();
+    cout << "Average TAT: " << avgTAT / (float)parsed_data.size() << endl;
+    int idle = countGaps(timeline);
+    cout << "Runtime of Simulator: " << time - idle << endl;
     return;
 }
 
@@ -373,6 +485,7 @@ void Processor::RR(vector<Process *> parsed_data, char *process_file, int timeIn
     int timeSlice = timeInterval;
     int maxTAT = 0;
     float avgTAT = 0;
+    int idleTime = 0;
     queue<pair<int, Process *>> ready;
     priority_queue<pair<int, Process *>, vector<pair<int, Process *>>, greater<pair<int, Process *>>> waiting;
     int i;
@@ -427,7 +540,10 @@ void Processor::RR(vector<Process *> parsed_data, char *process_file, int timeIn
             // cout<<time<<endl;
         }
         else
+        {
             time++;
+            idleTime++;
+        }
         for (; i < parsed_data.size(); i++)
         {
             if (parsed_data[i]->arrival <= time)
@@ -454,11 +570,13 @@ void Processor::RR(vector<Process *> parsed_data, char *process_file, int timeIn
         if (timeLeft > 0)
             ready.push({timeLeft, top});
     }
-    
+    output.close();
     cout << "Scheduling Algorithm: Round Robin\n";
     cout << "Time to Complete: " << time << endl;
     cout << "Maximum TAT: " << maxTAT << endl;
-    cout << "Average TAT: " << avgTAT / (float)parsed_data.size();
+    cout << "Average TAT: " << avgTAT / (float)parsed_data.size() << endl;
+    int idle = countGaps(timeline);
+    cout << "Runtime of Simulator: " << time - idle << endl;
     return;
 }
 
@@ -477,6 +595,7 @@ void MultiCoreProcessor::FIFO(vector<Process *> parsed_data, char *process_file)
     // output2.open(timeline2);
 
     int time = parsed_data[0]->arrival - 1;
+    int idleTime = -1;
     queue<Process *> ready;
     vector<string> ans0;
     vector<string> ans1;
@@ -505,6 +624,10 @@ void MultiCoreProcessor::FIFO(vector<Process *> parsed_data, char *process_file)
         if (run2 > 0)
         {
             run2--;
+        }
+        if (run1 == 0 && run2 == 0)
+        {
+            idleTime++;
         }
         for (; i < parsed_data.size(); i++)
         {
@@ -700,8 +823,10 @@ void MultiCoreProcessor::FIFO(vector<Process *> parsed_data, char *process_file)
         avgTAT += TAT;
     }
     cout << "Maximum TAT: " << maxTAT << endl;
-    cout << "Average TAT: " << avgTAT / (float)parsed_data.size();
-
+    cout << "Average TAT: " << avgTAT / (float)parsed_data.size() << endl;
+    auto idle = countGapsMC(timeline1);
+    cout << "Runtime of Simulator(CPU1): " << time - idle.first << endl;
+    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl;
     return;
 }
 
@@ -727,6 +852,7 @@ void MultiCoreProcessor::NPSJF(vector<Process *> parsed_data, char *process_file
     int i = 1;
     int maxTAT = 0;
     float avgTAT = 0;
+    int idleTime = -1;
     int run1 = 0;
     int n = parsed_data.size();
     Process *p1 = NULL;
@@ -745,6 +871,8 @@ void MultiCoreProcessor::NPSJF(vector<Process *> parsed_data, char *process_file
         {
             run2--;
         }
+        if (run1 == 0 && run2 == 0)
+            idleTime++;
         for (; i < parsed_data.size(); i++)
         {
             if (parsed_data[i]->arrival <= time)
@@ -869,6 +997,9 @@ void MultiCoreProcessor::NPSJF(vector<Process *> parsed_data, char *process_file
     }
     cout << "Average Turnaround Time: " << avgTAT / n << endl;
     cout << "Maximuum Turnaround Time: " << maxTAT << endl;
+    auto idle = countGapsMC(timeline1);
+    cout << "Runtime of Simulator(CPU1): " << time - idle.first << endl;
+    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl;
     return;
 }
 
@@ -898,7 +1029,7 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
 
     RRun run1;
     RRun run2;
-
+    int idleTime = 0;
     while (!ready.empty() || !waiting.empty() || run1.cur || run2.cur)
     {
         // cpu1 khali hoga to uspe dalenge
@@ -954,8 +1085,14 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
                 vec1.push_back(temp1);
                 //output1 << time  << endl;
                 run1.cur->index++;
+<<<<<<< HEAD
                 if (run1.cur->index < run1.cur->bursts.size()){
                     waiting.push(make_pair(time + 1 + run1.cur->bursts[run1.cur->index], run1.cur));
+=======
+                if (run1.cur->index < run1.cur->bursts.size())
+                {
+                    waiting.push({time + 1 + run1.cur->bursts[run1.cur->index], run1.cur});
+>>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
                 }
                 else{
                     run1.cur->completion = time+1;
@@ -967,8 +1104,13 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
                 temp1 += to_string(time);
                 temp1 += "\n";
                 vec1.push_back(temp1);
+<<<<<<< HEAD
                 //output1 << time  << endl;
                 ready.push(make_pair(run1.run, run1.cur));
+=======
+                // output1 << time  << endl;
+                ready.push({run1.run, run1.cur});
+>>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
                 run1.cur = nullptr;
             }
         }
@@ -985,8 +1127,14 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
                 vec2.push_back(temp2);
                 //output2 << time  << endl;
                 run2.cur->index++;
+<<<<<<< HEAD
                 if (run2.cur->index < run2.cur->bursts.size()){
                     waiting.push(make_pair(time + 1 + run2.cur->bursts[run2.cur->index], run2.cur));
+=======
+                if (run2.cur->index < run2.cur->bursts.size())
+                {
+                    waiting.push({time + 1 + run2.cur->bursts[run2.cur->index], run2.cur});
+>>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
                 }
                 else{
                     run2.cur->completion = time + 1;
@@ -998,12 +1146,21 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
                 temp2 += to_string(time);
                 temp2 += "\n";
                 vec2.push_back(temp2);
+<<<<<<< HEAD
                 //output2 << time  << endl;
                 ready.push(make_pair(run2.run, run2.cur));
+=======
+                // output2 << time  << endl;
+                ready.push({run2.run, run2.cur});
+>>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
                 run2.cur = nullptr;
             }
         }
-
+        if (run1.cur == nullptr && run2.cur == nullptr)
+        {
+            idleTime++;
+            //cout<<time<<" ";
+        }
         // waiting se ready me if possible
         while (!waiting.empty() && waiting.top().first <= time + 1)
         {
@@ -1011,11 +1168,11 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
             waiting.pop();
             temp->index++;
             if (temp->index < temp->bursts.size())
-                ready.push(make_pair(temp->bursts[temp->index], temp));
+                ready.push({temp->bursts[temp->index], temp});
         }
         while (i < n && parsed_data[i]->arrival <= time + 1)
         {
-            ready.push(make_pair(parsed_data[i]->bursts[0], parsed_data[i]));
+            ready.push({parsed_data[i]->bursts[0], parsed_data[i]});
             i++;
         }
 
@@ -1042,8 +1199,17 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
         maxTAT = max(maxTAT, TAT);
         turnAround += TAT;
     }
+<<<<<<< HEAD
     cout<< "Average Turnaround Time: "<<turnAround/n<<endl;
     cout<< "Maximum Turnaround Time: "<<maxTAT<<endl;
+=======
+    cout << "Average Turnaround Time: " << turnAround / n << endl;
+    cout << "Maximum Turnaround Time: " << maxTAT << endl;
+
+    auto idle = countGapsMC(fileName);
+    cout << "Runtime of Simulator(CPU1): " << time - idle.first << endl;
+    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl;
+>>>>>>> 255da247d97f2a56ed4b6dbc8c8c74d53221f47f
     return;
 }
 
