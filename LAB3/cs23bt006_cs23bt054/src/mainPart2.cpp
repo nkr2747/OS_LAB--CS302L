@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
         auto start = high_resolution_clock::now();
         cpu0.FIFO(parsed_data,process_file);
         auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
+        auto duration = duration_cast<microseconds>(stop - start);
         cout << "Total runtime: " << duration.count() << " microseconds" << endl;
         break;
     }
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         auto start = high_resolution_clock::now();
         cpu0.NPSJF(parsed_data,process_file);
         auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
+        auto duration = duration_cast<microseconds>(stop - start);
         cout << "Total runtime: " << duration.count() << " microseconds" << endl;
         break;
     }
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
         auto start = high_resolution_clock::now();
         cpu0.RR(parsed_data,process_file,10);
         auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
+        auto duration = duration_cast<microseconds>(stop - start);
         cout << "Total runtime: " << duration.count() << " microseconds" << endl;
         break;
     }

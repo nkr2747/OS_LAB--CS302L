@@ -1015,16 +1015,18 @@ void MultiCoreProcessor::NPSJF(vector<Process *> parsed_data, char *process_file
     return;
 }
 
-
-vector<string> mergeProcessIntervals(const vector<string>& inputLines) {
+vector<string> mergeProcessIntervals(const vector<string> &inputLines)
+{
     vector<string> merged;
 
     string prevKey = "";
     int startTime = -1;
     int lastTime = -1;
 
-    for (const string& line : inputLines) {
-        if (line.empty()) continue;
+    for (const string &line : inputLines)
+    {
+        if (line.empty())
+            continue;
 
         stringstream ss(line);
         string key;
@@ -1032,12 +1034,16 @@ vector<string> mergeProcessIntervals(const vector<string>& inputLines) {
 
         ss >> key >> time;
 
-        if (key == prevKey && time == lastTime + 1) {
+        if (key == prevKey && time == lastTime + 1)
+        {
             // Continuation of the same process block
             lastTime = time;
-        } else {
+        }
+        else
+        {
             // Save previous block if it exists
-            if (!prevKey.empty()) {
+            if (!prevKey.empty())
+            {
                 merged.push_back(prevKey + " " + to_string(startTime) + " " + to_string(lastTime));
             }
             // Start new block
@@ -1048,7 +1054,8 @@ vector<string> mergeProcessIntervals(const vector<string>& inputLines) {
     }
 
     // Add the final block
-    if (!prevKey.empty()) {
+    if (!prevKey.empty())
+    {
         merged.push_back(prevKey + " " + to_string(startTime) + " " + to_string(lastTime));
     }
 
@@ -1076,54 +1083,58 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
     vector<string> vec2;
     string temp1 = "";
     string temp2 = "";
-    
+
     // Initialize: Add all processes that have arrived at the start time
     while (i < n && time >= parsed_data[i]->arrival)
     {
         ready.push({parsed_data[i]->bursts[0], parsed_data[i]});
         i++;
     }
-    
+
     Run run1;
     Run run2;
     run1.cur = NULL;
     run1.left = 0;
     run2.cur = NULL;
     run2.left = 0;
-    
+
     while (!ready.empty() || !waiting.empty() || run1.cur != NULL || run2.cur != NULL || i < n)
     {
         // Check for preemption and reassignment
         bool needReassign = false;
-        
+
         // Collect currently running processes for potential preemption
-        if (run1.cur != NULL && run1.left > 0) {
+        if (run1.cur != NULL && run1.left > 0)
+        {
             ready.push({run1.left, run1.cur});
             run1.cur = NULL;
             run1.left = 0;
             needReassign = true;
         }
-        if (run2.cur != NULL && run2.left > 0) {
+        if (run2.cur != NULL && run2.left > 0)
+        {
             ready.push({run2.left, run2.cur});
             run2.cur = NULL;
             run2.left = 0;
             needReassign = true;
         }
-        
+
         // Assign processes to CPUs (preemptive assignment)
-        if (!ready.empty() && run1.cur == NULL) {
+        if (!ready.empty() && run1.cur == NULL)
+        {
             auto top = ready.top();
             ready.pop();
             run1.cur = top.second;
             run1.left = top.first;
         }
-        if (!ready.empty() && run2.cur == NULL) {
+        if (!ready.empty() && run2.cur == NULL)
+        {
             auto top = ready.top();
             ready.pop();
             run2.cur = top.second;
             run2.left = top.first;
         }
-        
+
         // CPU0 execution
         if (run1.cur != NULL)
         {
@@ -1131,12 +1142,12 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
             temp1 = "P";
             temp1 += to_string(run1.cur->p_no);
             temp1 += ",";
-            temp1 += to_string((run1.cur->index/2)+1);
+            temp1 += to_string((run1.cur->index / 2) + 1);
             temp1 += "  ";
             temp1 += to_string(time);
             vec1.push_back(temp1);
-            file1 << "P" << run1.cur->p_no << "," << (run1.cur->index/2)+1 << "   " << time <<  endl;
-            
+            file1 << "P" << run1.cur->p_no << "," << (run1.cur->index / 2) + 1 << "   " << time << endl;
+
             if (run1.left <= 0)
             {
                 // CPU burst completed
@@ -1146,7 +1157,7 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
                     // Move to I/O (odd index in bursts array)
                     run1.cur->index = ind + 1;
                     // I/O completion time = current time + I/O burst duration
-                    waiting.push({time + run1.cur->bursts[ind+1], run1.cur});
+                    waiting.push({time + run1.cur->bursts[ind + 1], run1.cur});
                 }
                 else
                 {
@@ -1157,10 +1168,11 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
                 run1.left = 0;
             }
         }
-        else {
+        else
+        {
             file1 << "IDLE   " << time << endl;
         }
-        
+
         // CPU1 execution
         if (run2.cur != NULL)
         {
@@ -1168,12 +1180,12 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
             temp2 = "P";
             temp2 += to_string(run2.cur->p_no);
             temp2 += ",";
-            temp2 += to_string((run2.cur->index/2)+1);
+            temp2 += to_string((run2.cur->index / 2) + 1);
             temp2 += "  ";
             temp2 += to_string(time);
             vec2.push_back(temp2);
-            file2 << "P" << run2.cur->p_no << "," << (run2.cur->index/2)+1 << "   " << time << endl;
-            
+            file2 << "P" << run2.cur->p_no << "," << (run2.cur->index / 2) + 1 << "   " << time << endl;
+
             if (run2.left <= 0)
             {
                 // CPU burst completed
@@ -1183,7 +1195,7 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
                     // Move to I/O (odd index in bursts array)
                     run2.cur->index = ind + 1;
                     // I/O completion time = current time + I/O burst duration
-                    waiting.push({time + run2.cur->bursts[ind+1], run2.cur});
+                    waiting.push({time + run2.cur->bursts[ind + 1], run2.cur});
                 }
                 else
                 {
@@ -1194,20 +1206,21 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
                 run2.left = 0;
             }
         }
-        else {
+        else
+        {
             file2 << "IDLE   " << time << endl;
         }
-        
+
         // Advance time
         time++;
-        
+
         // Check for new arrivals
         while (i < n && time >= parsed_data[i]->arrival)
         {
             ready.push({parsed_data[i]->bursts[0], parsed_data[i]});
             i++;
         }
-        
+
         // Check for I/O completions
         while (!waiting.empty() && waiting.top().first <= time)
         {
@@ -1222,7 +1235,7 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
             }
         }
     }
-    
+
     // Uncomment if you have the mergeProcessIntervals function
     // vector<string> ans1 = mergeProcessIntervals(vec1);
     // file << "CPU0\n";
@@ -1234,21 +1247,22 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
     // for(auto it: ans1){
     //     file << it << endl;
     // }
-    
+
     cout << "Simulation completed at time: " << time << endl;
-    
-    
+
     file1.close();
     file2.close();
     vector<string> ans = mergeProcessIntervals(vec1);
     file << "CPU0\n";
-    for(auto it: ans){
-        file << it <<endl;
+    for (auto it : ans)
+    {
+        file << it << endl;
     }
     file << "CPU1\n";
     ans = mergeProcessIntervals(vec2);
-    for(auto it: ans){
-        file << it <<endl;
+    for (auto it : ans)
+    {
+        file << it << endl;
     }
     file.close();
     float turnAround = 0;
@@ -1264,7 +1278,7 @@ void MultiCoreProcessor::PSJF(std::vector<Process *> parsed_data, char *process_
 
     auto idle = countGapsMC(fileName);
     cout << "Runtime of Simulator(CPU1): " << time - idle.first << endl;
-    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl; 
+    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl;
 }
 
 void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, int timeSlice)
@@ -1453,6 +1467,6 @@ void MultiCoreProcessor::RR(vector<Process *> parsed_data, char *process_file, i
 
     auto idle = countGapsMC(fileName);
     cout << "Runtime of Simulator(CPU1): " << time - idle.first << endl;
-    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl; 
+    cout << "Runtime of Simulator(CPU2): " << time - idle.second << endl;
     return;
 }
