@@ -1,1 +1,0 @@
-SELECT temp.ID, temp.name, course.course_id,course.title,course.dept_name from (SELECT t.course_id,i.ID, i.name from instructor as i,teaches as t where i.ID = t.ID and i.dept_name = "Comp. Sci." and t.year = 2009) as temp,course where temp.course_id = course.course_id and dept_name = "Civil";
