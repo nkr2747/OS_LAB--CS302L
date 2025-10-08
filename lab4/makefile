@@ -1,6 +1,6 @@
 build: Simulator.cpp PageTable.h LRUCache.h
-	g++ .\Simulator.cpp .\LRUCache.h .\PageTable.h -o prog
+	g++ .\Simulator.cpp -o prog
 run:
-	./prog 64 64 FIFO global combined.trace
+	prog.exe 16 16 OPT local combined.trace
 clean:
 	rm -f result* *.exe
